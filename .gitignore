@@ -1,0 +1,12 @@
+# Emacs
+*~
+#*
+.#*
+
+# Data
+
+# Other
+.DS_Store
+
+# pycharm
+.idea/
