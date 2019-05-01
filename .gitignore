@@ -4,6 +4,7 @@
 .#*
 
 # Data
+data/
 
 # Other
 .DS_Store
