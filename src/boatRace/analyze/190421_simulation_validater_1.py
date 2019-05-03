@@ -31,14 +31,14 @@ if __name__ == "__main__":
     the_simulation_result_file = summarizer_motorboat_data_filename.make_csv_simulation_results()
 
     #指定した期日内で行われたレース全てをシミュレート
-    the_date_from = '20190215'
-    the_date_to = '20190216'
+    the_date_from = '20190430'
+    the_date_to = '20190501'
 
     # simulationの試行回数
     simulation_time = 10000
 
     # betする期待値
-    voting_threshold = 1.2
+    voting_threshold = 2
     ###########
 
     # race noのリストを作成

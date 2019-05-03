@@ -8,26 +8,6 @@ import boatrace_crawler_conf
 import summarizer_motorboat_data_filename
 
 
-def main(rno, jcd, hd):
-    # クロール対象サイトのurl作成
-    odds_url = boatrace_crawler_conf.make_url("odds3t", rno, jcd, hd)
-    print(odds_url)
-    try:
-        # 対象サイトをパースしてcrawl
-        soup = boatrace_crawler_conf.html_parser(odds_url)
-        place_bed, odds_list = extract_from_trifecta(soup)
-
-        # dataframeとして格納
-        new_odds_summary_df = convert_into_dataframe(hd, jcd, rno, place_bed, odds_list)
-
-    except IndexError:
-        new_odds_summary_df = pd.DataFrame()
-
-    time.sleep(0.1)
-
-    return new_odds_summary_df
-
-
 def extract_from_trifecta(soup):
     """
 
@@ -98,6 +78,27 @@ def convert_into_dataframe(hd, jcd, rno, place_bed, odds_list):
     return new_odds_df
 
 
+def main(rno, jcd, hd):
+    # クロール対象サイトのurl作成
+    odds_url = boatrace_crawler_conf.make_url("odds3t", rno, jcd, hd)
+    print(odds_url)
+    try:
+        # 対象サイトをパースしてcrawl
+        soup = boatrace_crawler_conf.html_parser(odds_url)
+        place_bed, odds_list = extract_from_trifecta(soup)
+
+        # dataframeとして格納
+        new_odds_summary_df = convert_into_dataframe(hd, jcd, rno, place_bed, odds_list)
+
+    except IndexError:
+        new_odds_summary_df = pd.DataFrame()
+
+    time.sleep(0.1)
+
+    return new_odds_summary_df
+
+
+
 if __name__ == "__main__":
 
     # input option 以下から選ぶ
@@ -126,8 +127,8 @@ if __name__ == "__main__":
 
     #### input option 2: 指定した期日内で行われたレースをcrawle ######
 
-    the_date_from = '20180425'
-    the_date_to = '20180528'
+    the_date_from = '20190502'
+    the_date_to = '20190503'
     # race noのリスト
     the_rno_list = [str(i + 1) + "R" for i in range(12)]
     # 会場のリスト

@@ -49,3 +49,10 @@ def make_csv_simulation_results():
     csv_file = os.path.join(path, filename)
 
     return csv_file
+
+def make_csv_closing_time(hd):
+    path = r"/Users/grice/mywork/Gambling/data/boatRace"
+    filename = "".join(hd.split("/")) + ".csv"
+    csv_file = os.path.join(path, filename)
+
+    return csv_file

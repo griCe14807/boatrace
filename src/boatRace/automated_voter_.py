@@ -15,8 +15,6 @@ import motorboat_odds_crawler
 import calc_refund_rate
 import boatrace_crawler_conf
 
-print("this is automated voter!")
-
 
 def argparser():
     """
@@ -53,8 +51,8 @@ vote_pass = "65taka"
 the_race_results_file = summarizer_motorboat_data_filename.make_csv_race_results()
 
 # simulationの試行回数
-the_num_simulation = 100
-the_odds_threshold = 1
+the_num_simulation = 10000
+the_odds_threshold = 2
 
 # 一つの組番に対するbet額 (1なら100円、10なら100円)
 bet_amount = 1
@@ -90,50 +88,75 @@ the_expected_value_list, the_bet_list = calc_refund_rate.calc_expect_value_of_ea
 print(the_bet_list)
 
 
-# 2.1 操作するブラウザを開く
-driver = webdriver.Chrome('/Users/grice/Desktop/Selenium/chromedriver')
+"""
+# TODO: simulation結果をodds_listと同じ形（[投票番号, 最終オッズ]のリストを全組み合わせについて格納したリスト）で格納
+the_simulation_result_list = []
+for i in range(len(the_number_tuple)):
+    the_simulation_result_list.append([the_number_tuple[i], the_counts_tuple[i]/the_num_simulation])
+"""
 
-# 2.2 ログイン
-driver.get('https://boatrace.jp/owpc/pc/login?authAfterUrl=/pc/extra/tb/index.html%3FvoteTagId%3DcommonHead')
-driver.find_element_by_name("in_KanyusyaNo").send_keys(KanyusyaNo)
-driver.find_element_by_name("in_AnsyoNo").send_keys(AnsyoNo)
-driver.find_element_by_name("in_PassWord").send_keys(PassWord)
-driver.find_element_by_class_name("is-login1").click()
-# print(driver.current_url)
 
-# 2.3 投票ページへ移動
-driver.find_element_by_id("commonHead").click()
-handle_array = driver.window_handles
-driver.close()  # 元のページは閉じる
-driver.switch_to.window(handle_array[-1])
-# print(driver.current_url)
+# if elseは投票先がない（基準値を超えるnumberが一つもない）時の対策
+if not the_bet_list:
+    pass
+else:
+    # 2.1 操作するブラウザを開く
+    driver = webdriver.Chrome('/Users/grice/Desktop/Selenium/chromedriver')
 
-# 投票するレースを指定
-time.sleep(2)   # jsを実行するための待機時間
-driver.find_element_by_id("jyo" + the_jcd_dict[the_jcd]).click()
-print(driver.current_url)
+    # 2.2 ログイン
+    driver.get('https://boatrace.jp/owpc/pc/login?authAfterUrl=/pc/extra/tb/index.html%3FvoteTagId%3DcommonHead')
+    driver.find_element_by_name("in_KanyusyaNo").send_keys(KanyusyaNo)
+    driver.find_element_by_name("in_AnsyoNo").send_keys(AnsyoNo)
+    driver.find_element_by_name("in_PassWord").send_keys(PassWord)
+    driver.find_element_by_class_name("is-login1").click()
+    # print(driver.current_url)
 
-time.sleep(2)   # JSを実行するための待機時間
-# print(driver.page_source)
+    # 2.3 投票ページへ移動
+    driver.find_element_by_id("commonHead").click()
+    handle_array = driver.window_handles
+    driver.close()  # 元のページは閉じる
+    driver.switch_to.window(handle_array[-1])
+    # print(driver.current_url)
 
-# bet額を入力
-driver.find_element_by_id("amount").send_keys(bet_amount)
+    # 投票するレースを指定
+    time.sleep(2)   # jsを実行するための待機時間
+    driver.find_element_by_id("jyo" + the_jcd_dict[the_jcd]).click()
+    print(driver.current_url)
 
-# bet listに入っている番号をbetする
-for the_bet_number in the_bet_list:
-    # the_bet_numberを元に実際にbetボタンをクリック
-    # (ex. "1-2-4"なら、regbtn1-1, regbtn2-2, regbtn4-3)ボタンをクリック
-    bet_number_list = []
-    _list = the_bet_number.split("-")
-    for i, _ in enumerate(_list, 1):
-        regbtn_number = "regbtn_" + str(_) + "_" + str(i)
-        # print(regbtn_number)
-        driver.find_element_by_id(regbtn_number).click()
-        # "ベットリストに追加" ボタンをクリック
-        driver.find_element_by_id("regAmountBtn").click()
-    # "投票入力完了" ボタンをクリック
-    driver.find_element_by_class_name("btnSubmit off").click()
+    time.sleep(2)   # JSを実行するための待機時間
+    # print(driver.page_source)
 
-# todo: passwardと合計金額を入力し、bet完了
-sum_bet_amount = bet_amount * 100 * len(the_bet_list)
+    # オッズ投票のタブに移動
+    driver.execute_script("document.querySelector('#betmsthod2 > a').click();")
+    # bet額を入力
+    driver.find_element_by_id("amount").send_keys(bet_amount)
+
+    # the_bet_listに入っているボタン全てをクリック
+    for the_bet_number in the_bet_list:
+        btn_click_js = "document.querySelector('#oddskumiban" + the_bet_number + " > a').click();"
+        # print(btn_click_js)
+        driver.execute_script(btn_click_js)
+
+    # 「ベットリストに追加」をクリック
+    driver.execute_script('document.querySelector("#oddsAmountBtn > a").click();')
+    time.sleep(2)
+
+    # 「投票入力完了」をクリック→ページ遷移
+    driver.find_element_by_link_text("投票入力完了").click()
+    time.sleep(2)
+
+    # passwardと合計金額を入力し、bet完了
+    sum_bet_amount = bet_amount * 100 * len(the_bet_list)
+    driver.find_element_by_id("amount").send_keys(sum_bet_amount)
+    driver.find_element_by_id("pass").send_keys(vote_pass)
+
+    # 「投票する」ボタンをクリック
+    driver.find_element_by_id("submitBet").click()
+    time.sleep(2)
+
+    # 確認のポップアップをクリック
+    driver.execute_script('document.querySelector("#ok").click();')
+
+    # windowを閉じる
+    driver.close()
 

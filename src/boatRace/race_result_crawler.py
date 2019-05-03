@@ -39,8 +39,8 @@ if __name__ == "__main__":
     # もともとcsvファイルが存在する状態で回す必要があることに注意
 
     # crawl開始日付、終了日付の指定
-    the_date_from = '20181210'
-    the_date_to = '20181220'
+    the_date_from = '20190428'
+    the_date_to = '20190501'
 
     # output csvファイルの指定
     the_boatrace_results_file = summarizer_motorboat_data_filename.make_csv_race_results()

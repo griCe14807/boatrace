@@ -23,9 +23,9 @@ if __name__ == "__main__":
     # 読み込み先のファイルを指定
     the_race_results_file = summarizer_motorboat_data_filename.make_csv_race_results()
 
-    the_rno = "12R"
-    the_jcd = "鳴　門"
-    the_hd = "2019/05/01"
+    the_rno = "3R"
+    the_jcd = "江戸川"
+    the_hd = "2019/05/03"
 
     # simulationの試行回数
     the_num_simulation = 10000
