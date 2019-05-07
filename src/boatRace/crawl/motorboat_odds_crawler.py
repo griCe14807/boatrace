@@ -1,9 +1,15 @@
 # -*- coding=utf8 =*-
 
 import pandas as pd
-import glob
 import time
 import itertools
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_dir, '..'))
+sys.path.append(os.path.join(current_dir, '../analyze/'))
+
+# my module
 import boatrace_crawler_conf
 import summarizer_motorboat_data_filename
 
@@ -52,9 +58,49 @@ def extract_from_trifecta(soup):
     return place_bed, odds_list
 
 
+
+def extract_from_exacta(soup):
+    """
+
+    :param soup:
+    :return place_bed: 勝式：三連単
+    :return odds_list: [投票番号, 最終オッズ]のリストを全組み合わせについて格納したリスト
+    """
+
+    set_number_list = [" 1-2", " 5-1", " 6-1", " 2-1", " 3-1", " 4-1",
+                       " 1-3", " 5-2", " 6-2", " 2-3", " 3-2", " 4-2",
+                       " 1-4", " 5-3", " 6-3", " 2-4", " 3-4", " 4-3",
+                       " 1-5", " 5-4", " 6-4", " 2-5", " 3-5", " 4-5",
+                       " 1-6", " 5-6", " 6-5", " 2-6", " 3-6", " 4-6",
+                       ]
+
+    #place bed (勝式)
+    place_bed = "2連単"
+
+    # make results_odds list
+    odds_list = []
+    contentsFrame1_inner = soup.find(class_="contentsFrame1_inner")
+    odds_table = contentsFrame1_inner.find_all(class_="table1")[1].find(class_="is-p3-0")
+    odds_list_soup = odds_table.find_all(class_="oddsPoint")
+    for i, odds in enumerate(odds_list_soup):
+        odds_list.append([set_number_list[i], odds.text])
+
+    return place_bed, odds_list
+
+
+def extract_raceresults(rno, jcd, hd):
+    raceResult_url = boatrace_crawler_conf.make_url("raceresult", rno, jcd, hd)
+
+    # 対象サイトをパースしてcrawl
+    the_soup = boatrace_crawler_conf.html_parser(raceResult_url)
+    tr = the_soup.find("tr", {"class": "is-p6-0"}).find(class_="numberSet1_row")
+    result_trrifecta = " " + "".join([element.text for element in tr.find_all("span")])
+
+    return result_trrifecta
+
+
 def convert_into_dataframe(hd, jcd, rno, place_bed, odds_list):
     """
-    pandas dataframeとしてすでにあるデータを読み込み、マージして重複を削除
     :param hd: 開催日
     :param jcd: 開催場所
     :param rno: レースNo
@@ -78,22 +124,18 @@ def convert_into_dataframe(hd, jcd, rno, place_bed, odds_list):
     return new_odds_df
 
 
-def main(rno, jcd, hd):
+def main(rno, jcd, hd, how_to_bet):
     # クロール対象サイトのurl作成
-    odds_url = boatrace_crawler_conf.make_url("odds3t", rno, jcd, hd)
+    odds_url = boatrace_crawler_conf.make_url(how_to_bet, rno, jcd, hd)
     print(odds_url)
-    try:
-        # 対象サイトをパースしてcrawl
-        soup = boatrace_crawler_conf.html_parser(odds_url)
-        place_bed, odds_list = extract_from_trifecta(soup)
 
-        # dataframeとして格納
-        new_odds_summary_df = convert_into_dataframe(hd, jcd, rno, place_bed, odds_list)
+    # 対象サイトをパースしてcrawl
+    soup = boatrace_crawler_conf.html_parser(odds_url)
+    # extractor = get_extractor()
+    place_bed, odds_list = extract_from_trifecta(soup)
 
-    except IndexError:
-        new_odds_summary_df = pd.DataFrame()
-
-    time.sleep(0.1)
+    # dataframeとして格納
+    new_odds_summary_df = convert_into_dataframe(hd, jcd, rno, place_bed, odds_list)
 
     return new_odds_summary_df
 
@@ -101,66 +143,41 @@ def main(rno, jcd, hd):
 
 if __name__ == "__main__":
 
-    # input option 以下から選ぶ
-    ##### input option 1: 自分がこれまで投票したレースについてcrawle #######
-    """
-    # 投票結果のcsvファイルから、どのレース結果が必要かを読み取る
-    the_voting_csv_file_list = glob.glob(r"/Users/grice/mywork/Gambling/data/boatRace/results_voting/myDownload/not_yet/*")
-    the_voting_df_list = [pd.read_csv(date_of_data, encoding="shift-jis") for date_of_data in the_voting_csv_file_list]
-    the_voting_df = pd.concat(the_voting_df_list)
+    #### input 指定した期日に行われたレースをcrawle ######
 
-    for_input_df = the_voting_df.drop_duplicates(subset=['レース', 'レース場', '日付'])
+    the_hd = '2019/05/07'
+    how_to_bet = "odds3t"
 
-    the_rno_list = []
-    the_jcd_list = []
-    the_hd_list = []
-
-    for index, row in for_input_df.iterrows():
-        rno = row['レース']
-        jcd = row['レース場']
-        hd = row['日付']
-
-        the_rno_list.append(rno)
-        the_jcd_list.append(jcd)
-        the_hd_list.append(hd)
-    """
-
-    #### input option 2: 指定した期日内で行われたレースをcrawle ######
-
-    the_date_from = '20190502'
-    the_date_to = '20190503'
     # race noのリスト
     the_rno_list = [str(i + 1) + "R" for i in range(12)]
     # 会場のリスト
     the_jcd_dict = boatrace_crawler_conf.make_jcd_dict()
     the_jcd_list = list(the_jcd_dict.keys())
-    # 日付のリスト
-    the_hd_list = boatrace_crawler_conf.make_hd_list(the_date_from, the_date_to)
     # print(the_hd_list)
 
     ###########
 
-    print(the_rno_list, the_jcd_list, the_hd_list)
-
-    # 出力先のファイルを指定
-    the_boatrace_odds_file = summarizer_motorboat_data_filename.make_csv_odds()
-    # すでにあるデータをdataframeとして読み込み
-    the_odds_summary_df = pd.read_csv(the_boatrace_odds_file)
 
     # main
-    for the_hd in the_hd_list:
-        for the_rno, the_jcd in itertools.product(the_rno_list, the_jcd_list):
-            the_new_odds_summary_df = main(the_rno, the_jcd, the_hd)
-            # 二つのdataframeをmerge
-            the_odds_summary_df = the_odds_summary_df.append(the_new_odds_summary_df)
+    the_odds_summary_df_list = []
+    for the_rno, the_jcd in itertools.product(the_rno_list, the_jcd_list):
+        try:
+            this_odds_summary_df = main(the_rno, the_jcd, the_hd, how_to_bet)
 
-        # csv書きだし
-        the_odds_summary_df.to_csv(the_boatrace_odds_file, index=False)
+            # 的中カラムを作成。的中は1, 外れは0
+            this_odds_summary_df["的中"] = this_odds_summary_df["組番"] == extract_raceresults(the_rno, the_jcd, the_hd)
 
-        # 再度csv読み込みし、重複行を削除（一気にやろうとするとなぜか2こだけ重複が残る）
-        the_new_odds_summary_df = pd.read_csv(the_boatrace_odds_file)
-        the_new_odds_summary_df = the_new_odds_summary_df[~the_new_odds_summary_df.duplicated()]
-        print(the_new_odds_summary_df)
+            the_odds_summary_df_list.append(this_odds_summary_df)
 
-        # csv書きだし
-        the_new_odds_summary_df.to_csv(the_boatrace_odds_file, index=False)
+        except IndexError:
+            pass
+
+        time.sleep(0.1)
+
+    the_odds_summary_df = pd.concat(the_odds_summary_df_list)
+
+    # 出力先のファイルを指定
+    the_output_file = summarizer_motorboat_data_filename.make_csv_odds(the_hd, how_to_bet)
+
+    # csv書きだし
+    the_odds_summary_df.to_csv(the_output_file, index=False)

@@ -35,7 +35,7 @@ def calc_filtered_refund_rate(for_analysis_df, bin_size):
     return odds_vs_refund_rate_list
 
 
-def calc_expect_value_of_each_number(number_tuple, counts_tuple, odds_df, num_simulation, odds_threshold):
+def calc_expect_value_of_each_number(number_tuple, counts_tuple, odds_df, num_simulation, odds_threshold, coming_rate_threshold):
     # 組番ごとの期待値を計算
     expected_value_list = []
     bet_list = []
@@ -54,6 +54,7 @@ def calc_expect_value_of_each_number(number_tuple, counts_tuple, odds_df, num_si
             expected_value_list.append(expected_value)
 
             if expected_value > odds_threshold:
-                bet_list.append(number)
+                if the_coming_rate > coming_rate_threshold:
+                    bet_list.append(number)
 
     return expected_value_list, bet_list

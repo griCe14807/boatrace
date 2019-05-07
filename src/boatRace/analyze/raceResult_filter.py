@@ -35,6 +35,7 @@ def raceResult_filter(race_results_df, rno, jcd, hd):
 
     return filtered_df_list_racer_frame
 
+
 def filter_by_race(input_df, rno, jcd, hd):
     """
     input dataframeのうち、rno, jcd, hdで指定した部分を返す。
@@ -48,19 +49,6 @@ def filter_by_race(input_df, rno, jcd, hd):
                               (input_df["レース場"]==jcd) & (input_df["日付"]==hd)]
 
     return input_df_raceFiltered
-
-
-def load_data_into_df(race_results_file):
-    race_results_df = pd.read_csv(race_results_file, parse_dates=["日付"])
-
-    # racetimeをstrから秒数（float）に直す
-    racetime_float = race_results_df["レースタイム"].map(convert_time_into_float)
-    race_results_df["racetime_float"] = racetime_float
-
-    # cmapで指定するため、枠番もfloat型にする
-    race_results_df["枠"] = race_results_df["枠"].map(float)
-
-    return race_results_df
 
 
 def crawle_race_list(soup):
@@ -95,21 +83,6 @@ def filter_by_frame(race_results_df, frame):
 
     return filtered_df_frame
 
-
-# 以下関数内で引かれている関数
-def convert_time_into_float(x):
-    """
-
-    :param x:
-    :return:
-    """
-    # 5位6位のタイムは空なのでif文
-    if len(x) == 6:
-        return int(x[0]) * 60 + int(x[2:4]) + int(x[5])/10
-
-    else:
-    # 5位6位の時はタイムは一律125として表示
-        return 125
 
 
 if __name__ == "__main__":

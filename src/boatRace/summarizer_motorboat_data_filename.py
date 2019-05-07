@@ -6,11 +6,19 @@ windows-macのそれぞれでいじる際、ファイルごとにパスを変え
 
 """
 
+def return_directory_path(key):
+    directory_path_dict = {"odds": r"/Users/grice/mywork/Gambling/data/boatRace/results_odds/",
+                           "simulationResults": r"/Users/grice/mywork/Gambling/data/boatRace/analyze/simulation_results_csv/",
+                           "raceResults": r"/Users/grice/mywork/Gambling/data/boatRace/results_race"
+                           }
+
+    return directory_path_dict[key]
+
 
 # oddsまとめファイルのパスとファイル名
-def make_csv_odds():
-    boatrace_odds_csv_path = r"/Users/grice/mywork/Gambling/data/boatRace/results_odds"
-    boatrace_odds_csv_filename = "boatRace_odds.csv"
+def make_csv_odds(hd, how_to_bet):
+    boatrace_odds_csv_path = return_directory_path("odds") + how_to_bet[4:]
+    boatrace_odds_csv_filename = hd[0:4] + hd[5:7] + hd[8:10] + "_odds" + how_to_bet[4:] + ".csv"
     boatrace_odds_csv_file = os.path.join(boatrace_odds_csv_path, boatrace_odds_csv_filename)
 
     return boatrace_odds_csv_file
@@ -36,23 +44,37 @@ def make_csv_for_analysis():
     return for_analysis_csv_file
 
 
-def make_csv_race_results():
-    boatrace_race_csv_path = r"/Users/grice/mywork/Gambling/data/boatRace/results_race"
-    boatrace_race_csv_filename = "boatRace_raceResults.csv"
+def make_csv_race_results(hd):
+    boatrace_race_csv_path = return_directory_path("raceResults")
+    boatrace_race_csv_filename = hd[0:4] + hd[5:7] + hd[8:10] + "_boatRace_raceResults.csv"
     boatrace_raceResults_csv_file = os.path.join(boatrace_race_csv_path, boatrace_race_csv_filename)
 
     return boatrace_raceResults_csv_file
 
-def make_csv_simulation_results():
+def make_csv_simulation_results(the_date_from, the_date_to, voting_threshold):
     path = r"/Users/grice/mywork/Gambling/data/boatRace/analyze/simulation_results"
-    filename = "simulationResults.csv"
+    filename = the_date_from + "-" + the_date_to + "over" + str(voting_threshold) + ".csv"
     csv_file = os.path.join(path, filename)
 
     return csv_file
+
 
 def make_csv_closing_time(hd):
     path = r"/Users/grice/mywork/Gambling/data/boatRace"
     filename = "".join(hd.split("/")) + ".csv"
     csv_file = os.path.join(path, filename)
+    return csv_file
+
+
+def make_csv_simulation_results2(hd, how_to_bet):
+    path = return_directory_path("simulationResults") + how_to_bet
+    filename = hd[0:4] + hd[5:7] + hd[8:10] + "_" + how_to_bet + "_simulationResult.csv"
+    csv_file = os.path.join(path, filename)
 
     return csv_file
+
+
+# テスト用
+if __name__ == "__main__":
+    csv_file = make_csv_odds("2019/05/01", "3t")
+    print(csv_file)

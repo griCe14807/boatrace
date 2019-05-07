@@ -3,6 +3,12 @@ import re
 import pandas as pd
 import itertools
 import time
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_dir, '..'))
+sys.path.append(os.path.join(current_dir, '../analyze/'))
+# my module
 import boatrace_crawler_conf
 import summarizer_motorboat_data_filename
 
@@ -36,14 +42,10 @@ if __name__ == "__main__":
 
     #################### inputs ########################
 
-    # もともとcsvファイルが存在する状態で回す必要があることに注意
-
     # crawl開始日付、終了日付の指定
-    the_date_from = '20190428'
-    the_date_to = '20190501'
+    the_date_from = '20190507'
+    the_date_to = '20190508'
 
-    # output csvファイルの指定
-    the_boatrace_results_file = summarizer_motorboat_data_filename.make_csv_race_results()
     ####################################################
 
     # 以下で定義する全てのリストの要素の組み合わせについてcrawlを行う.
@@ -59,9 +61,6 @@ if __name__ == "__main__":
     # csvファイル内で定義されているcolumn名を書きだしておく
     the_cols = ["日付", "レース場", "レース", "着", "枠", "登録番号", "ボートレーサー", "レースタイム"]
 
-    # 結果をまとめたcsvファイル（すでにある）をdfとして読み込み。
-    the_race_result_df = pd.read_csv(the_boatrace_results_file)
-
     for the_hd in the_hd_list:
         for the_rno, the_jcd in itertools.product(the_rno_list, the_jcd_list):
 
@@ -74,23 +73,14 @@ if __name__ == "__main__":
             try:
                 # 対象サイトをパースしてcrawl
                 the_soup = boatrace_crawler_conf.html_parser(the_raceResult_url)
-                the_new_race_result_df = crawle_race_result(the_soup, the_cols, the_rno, the_jcd, the_hd)
-                # dataframeをconcut
-                the_race_result_df = pd.concat([the_race_result_df, the_new_race_result_df])
+                the_race_result_df = crawle_race_result(the_soup, the_cols, the_rno, the_jcd, the_hd)
 
             except AttributeError:
                 pass
 
             time.sleep(0.1)
 
-        # 重複が残ったまま書きだし
+        # output csvファイルの指定
+        the_boatrace_results_file = summarizer_motorboat_data_filename.make_csv_race_results(the_hd)
+        # 書きだし
         the_race_result_df.to_csv(the_boatrace_results_file, index=False)
-
-        # 重複行を削除
-        the_race_result_df = pd.read_csv(the_boatrace_results_file)
-        the_race_result_df = the_race_result_df[~the_race_result_df.duplicated()]
-        print(the_race_result_df)
-
-        # 再度書きだし
-        the_race_result_df.to_csv(the_boatrace_results_file, index=False)
-

@@ -1,15 +1,17 @@
 # -*- coding=utf8 =*-
-
-import matplotlib.pyplot as plt
 import itertools
 import pandas as pd
 import sys
-sys.path.append("../.")
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_dir, '..'))
+sys.path.append(os.path.join(current_dir, 'analyze/'))
 # my module
 import summarizer_motorboat_data_filename
 import raceResult_filter
 import simulate_race
 import boatrace_crawler_conf
+import argparse
 
 
 """
@@ -19,26 +21,57 @@ import boatrace_crawler_conf
 - 確率20位以内全て
 """
 
+def argparser():
+    """
+    start_date = 2019/05/01
+    end_date = 2019/05/02という指定で、2019年5月1日のシミュレーション結果が得られる
+    :return:
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--start_date",
+                        help=u"日時。'2919/05/01'のように、yyyy/mm/ddの形で指定",
+                        required=True
+                        )
+    parser.add_argument("-e", "--end_date",
+                        help=u"日時。'2019/05/01'のように、yyyy/mm/ddの形で指定",
+                        required=True
+                        )
+    parser.add_argument("-vt", "--voting_threshold",
+                        type=float,
+                        help=u"期待値がこの値を超えた場合にbetする。1, 2など数字で指定。",
+                        required=True
+                        )
+    args = parser.parse_args()
+
+    return args
+
+
 
 if __name__ == "__main__":
 
     ################inputs#################
+
+    # simulationの試行回数
+    simulation_time = 10000
+
+    # argparser
+    the_args = argparser()
+
+    # betする期待値
+    voting_threshold = the_args.voting_threshold
+
+    # 指定した期日内で行われたレース全てをシミュレート
+    the_date_from = "".join((the_args.start_date).split("/"))
+    the_date_to = "".join((the_args.end_date).split("/"))
+
     # 読み込み先のファイルを指定
     the_race_results_file = summarizer_motorboat_data_filename.make_csv_race_results()
     the_boatrace_odds_file = summarizer_motorboat_data_filename.make_csv_odds()
 
     # 書きだし先のファイル指定
-    the_simulation_result_file = summarizer_motorboat_data_filename.make_csv_simulation_results()
+    the_simulation_result_file = summarizer_motorboat_data_filename.make_csv_simulation_results(the_date_from, the_date_to, voting_threshold)
 
-    #指定した期日内で行われたレース全てをシミュレート
-    the_date_from = '20190430'
-    the_date_to = '20190501'
 
-    # simulationの試行回数
-    simulation_time = 10000
-
-    # betする期待値
-    voting_threshold = 2
     ###########
 
     # race noのリストを作成

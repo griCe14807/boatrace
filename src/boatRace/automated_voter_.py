@@ -1,10 +1,11 @@
 import argparse
 from selenium import webdriver
+import pandas as pd
 import time
 import sys
 import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(current_dir, '..'))
+sys.path.append(os.path.join(current_dir, 'crawl/'))
 sys.path.append(os.path.join(current_dir, 'analyze/'))
 
 # my module
@@ -39,67 +40,7 @@ def argparser():
     return args
 
 
-################### Input ###################
-
-# passwards
-KanyusyaNo = "08421741"
-AnsyoNo = "4563"
-PassWord = "vFAY9R"
-vote_pass = "65taka"
-
-# レース結果格納先ファイルの指定
-the_race_results_file = summarizer_motorboat_data_filename.make_csv_race_results()
-
-# simulationの試行回数
-the_num_simulation = 10000
-the_odds_threshold = 2
-
-# 一つの組番に対するbet額 (1なら100円、10なら100円)
-bet_amount = 1
-
-the_args = argparser()
-the_rno = the_args.race_number
-the_jcd = the_args.venue_name
-the_hd = the_args.holding_date
-
-##############################################
-
-
-# レース場を指定するためのdictを作っておく
-the_jcd_dict = boatrace_crawler_conf.make_jcd_dict()
-
-# 1.bet listを作成
-# 1.1 対象レースと同じ人・枠の過去データを抽出
-the_race_results_df = raceResult_filter.load_data_into_df(the_race_results_file)
-the_filtered_df_list_racer_frame = raceResult_filter.raceResult_filter(the_race_results_df,
-                                                                       the_rno, the_jcd, the_hd)
-# 1.2 過去のデータを用いてシミュレート
-the_number_tuple, the_counts_tuple = simulate_race.simulate_a_race(the_filtered_df_list_racer_frame, the_num_simulation)
-
-# 1.3 現在のオッズをcrawleし、結果をdfに格納して返す
-the_odds_df = motorboat_odds_crawler.main(the_rno, the_jcd, the_hd)
-
-# 1.4 組番ごとの期待値を計算し、期待値が1を超えるものはbetするリスト（the_bet_list)に追加
-the_expected_value_list, the_bet_list = calc_refund_rate.calc_expect_value_of_each_number(the_number_tuple,
-                                                                                           the_counts_tuple,
-                                                                                           the_odds_df,
-                                                                                           the_num_simulation,
-                                                                                           the_odds_threshold)
-print(the_bet_list)
-
-
-"""
-# TODO: simulation結果をodds_listと同じ形（[投票番号, 最終オッズ]のリストを全組み合わせについて格納したリスト）で格納
-the_simulation_result_list = []
-for i in range(len(the_number_tuple)):
-    the_simulation_result_list.append([the_number_tuple[i], the_counts_tuple[i]/the_num_simulation])
-"""
-
-
-# if elseは投票先がない（基準値を超えるnumberが一つもない）時の対策
-if not the_bet_list:
-    pass
-else:
+def bet_using_selenium(KanyusyaNo, AnsyoNo, PassWord, jcd, bet_amount, the_bet_list):
     # 2.1 操作するブラウザを開く
     driver = webdriver.Chrome('/Users/grice/Desktop/Selenium/chromedriver')
 
@@ -120,7 +61,7 @@ else:
 
     # 投票するレースを指定
     time.sleep(2)   # jsを実行するための待機時間
-    driver.find_element_by_id("jyo" + the_jcd_dict[the_jcd]).click()
+    driver.find_element_by_id("jyo" + the_jcd_dict[jcd]).click()
     print(driver.current_url)
 
     time.sleep(2)   # JSを実行するための待機時間
@@ -160,3 +101,71 @@ else:
     # windowを閉じる
     driver.close()
 
+
+
+################### Input ###################
+
+# passwards
+KanyusyaNo = "08421741"
+AnsyoNo = "4563"
+PassWord = "vFAY9R"
+vote_pass = "65taka"
+
+# betを行う際の基準
+the_odds_threshold = 2.0
+the_coming_rate_threshold = 0.03
+
+# 一つの組番に対するbet額 (1なら100円、10なら100円)
+bet_amount = 1
+
+the_args = argparser()
+the_rno = the_args.race_number
+the_jcd = the_args.venue_name
+the_hd = the_args.holding_date
+
+##############################################
+
+
+# レース場を指定するためのdictを作っておく(投票時に使用)
+the_jcd_dict = boatrace_crawler_conf.make_jcd_dict()
+
+# 1.bet listを作成
+# 1.1 対象レースのシミュレーション結果を抽出
+the_simulation_result_file = summarizer_motorboat_data_filename.make_csv_simulation_results2(the_hd, "3t")
+the_simulation_result_df = pd.read_csv(the_simulation_result_file)
+the_filtered_df = the_simulation_result_df[the_simulation_result_df["レース場"]==the_jcd]
+the_filtered_df = the_filtered_df[the_filtered_df["レース"]==the_rno]
+
+# 1.3 現在のオッズをcrawleし、結果をdfに格納して返す
+the_odds_df = motorboat_odds_crawler.main(the_rno, the_jcd, the_hd, "odds3t")
+
+# 1.4 組番ごとの期待値を計算し、期待値が1を超えるものはbetするリスト（the_bet_list)に追加
+for_analysis_df = pd.merge(the_odds_df, the_filtered_df, on=["日付", "レース場", "レース", "組番"], how="left")
+for_analysis_df["オッズ"] = for_analysis_df["オッズ"].astype(float)
+# 期待値カラムを作成
+for_analysis_df["期待値"] = for_analysis_df["オッズ"] * for_analysis_df["くる率"]
+print(for_analysis_df)
+
+the_bet_df = for_analysis_df[for_analysis_df["期待値"]>the_odds_threshold]
+the_bet_df = the_bet_df[the_bet_df["くる率"]>the_coming_rate_threshold]
+the_bet_list = the_bet_df["組番"].values.tolist()
+the_bet_list = [element[1:] for element in the_bet_list]
+print(the_bet_list)
+
+
+"""
+# TODO: simulation結果をodds_listと同じ形（[投票番号, 最終オッズ]のリストを全組み合わせについて格納したリスト）で格納
+the_simulation_result_list = []
+for i in range(len(the_number_tuple)):
+    the_simulation_result_list.append([the_number_tuple[i], the_counts_tuple[i]/the_num_simulation])
+"""
+
+# if elseは投票先がない（基準値を超えるnumberが一つもない）時の対策
+if not the_bet_list:
+    pass
+else:
+    # try-exceptは、時間がかぶるとseleniumの投票が失敗するのでそこを再度tryする
+    try:
+        bet_using_selenium(KanyusyaNo, AnsyoNo, PassWord, the_jcd, bet_amount, the_bet_list)
+    except:
+        bet_using_selenium(KanyusyaNo, AnsyoNo, PassWord, the_jcd, bet_amount, the_bet_list)

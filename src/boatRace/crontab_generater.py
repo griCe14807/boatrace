@@ -2,11 +2,18 @@
 # 1. 朝、このスクリプトを回し、その日のレーススケジュールcronを作成
 # 2. レーススケジュールcronに、automated_voterを実行させる
 
+
+import pandas as pd
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_dir, 'crawl/'))
+sys.path.append(os.path.join(current_dir, 'analyze/'))
+
+# my module
 import boatrace_crawler_conf
 import summarizer_motorboat_data_filename
 
-import datetime
-import pandas as pd
 
 def crawle_race_schedule(soup, jcd, hd):
     """
@@ -44,7 +51,7 @@ def cron_generater():
 if __name__ == "__main__":
 
     # input
-    the_hd = "2019/05/03"
+    the_hd = "2019/05/07"
 
     # race noは1固定でOK
     the_rno = "1R"
