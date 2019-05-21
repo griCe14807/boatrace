@@ -9,10 +9,13 @@ import analysis_df_maker
 if __name__ == "__main__":
     ### input
     voting_threshold = 2
-    occurrence_rate = 0.03
+    occurrence_rate = 0.05
     the_input_date = "20190503"
 
-    for_analysis_df = analysis_df_maker.main(the_input_date)
+    how_to_bet = "2tf"
+
+    for_analysis_df = analysis_df_maker.main(the_input_date, how_to_bet)
+    print(for_analysis_df)
 
     # 条件に応じてbetする組番を残したdfを作成（filtering)
     betted_df = for_analysis_df[for_analysis_df["期待値"] > voting_threshold]
@@ -23,8 +26,8 @@ if __name__ == "__main__":
     betted_df.loc[betted_df["的中"]==1, "収支"] = betted_df["オッズ"] - 1
     betted_df.loc[betted_df["的中"] == 0, "収支"] = - 1
 
-    output_filename = the_input_date + "_vt" + str(voting_threshold) + "_or" + str(occurrence_rate) + ".csv"
-    betted_df.to_csv(os.path.join("/Users/grice/mywork/Gambling/data/boatRace/analyze/for_analysis/", output_filename))
+    output_filename = the_input_date + "_" + how_to_bet + "_vt" + str(voting_threshold) + "_or" + str(occurrence_rate) + ".csv"
+    betted_df.to_csv(os.path.join("/Users/grice/mywork/boatrace/data/boatRace/simulation/for_analysis/", output_filename))
 
     """
     # 累計収支カラムを作成

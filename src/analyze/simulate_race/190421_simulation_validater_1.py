@@ -5,7 +5,7 @@ import sys
 import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, '..'))
-sys.path.append(os.path.join(current_dir, 'analyze/'))
+sys.path.append(os.path.join(current_dir, 'simulation/'))
 # my module
 import summarizer_motorboat_data_filename
 import raceResult_filter

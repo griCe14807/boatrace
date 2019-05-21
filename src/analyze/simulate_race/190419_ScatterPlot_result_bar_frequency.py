@@ -24,12 +24,11 @@ if __name__ == "__main__":
 
     ################inputs#################
 
-    # 読み込み先のファイルを指定
-    the_race_results_file = summarizer_motorboat_data_filename.make_csv_race_results()
-
     the_rno = "12R"
-    the_jcd = "蒲　郡"
-    the_hd = "2019/05/07"
+    the_jcd = "下　関"
+    the_hd = "2019/05/15"
+
+    how_to_bet = "odds3t"
 
     # simulationの試行回数
     the_num_simulation = 10000
@@ -38,15 +37,17 @@ if __name__ == "__main__":
     the_coming_rate_threshold = 0.03
 
     #######################################
+    # 過去のレース結果をdfとして取得
+    the_race_results_df = simulate_race.load_raceResults_as_a_df()
     # 対象レースと同じ人・枠の過去データを抽出
-    the_race_results_df = raceResult_filter.load_data_into_df(the_race_results_file)
     the_filtered_df_list_racer_frame = raceResult_filter.raceResult_filter(the_race_results_df,
                                                                            the_rno, the_jcd, the_hd)
+
     # 過去のデータを用いてシミュレート
     the_number_tuple, the_counts_tuple, num_2t, count_2t = simulate_race.simulate_a_race(the_filtered_df_list_racer_frame, the_num_simulation)
 
     # 現在のオッズをcrawleし、結果をdfに格納して返す
-    the_odds_df = motorboat_odds_crawler.main(the_rno, the_jcd, the_hd, "odds3t")
+    the_odds_df = motorboat_odds_crawler.main(the_rno, the_jcd, the_hd, how_to_bet)
 
     # 組番ごとの期待値を計算し、期待値が1を超えるものはbetするリスト（good_list)に追加
     the_expected_value_list, the_good_list = calc_refund_rate.calc_expect_value_of_each_number(the_number_tuple,
@@ -68,7 +69,10 @@ if __name__ == "__main__":
     fig3 = plt.figure(3)
     ax_3 = fig3.add_subplot(1, 1, 1)
     ax_3.bar(the_number_tuple, the_expected_value_list)
-
+    # 組番 vs くる率(二連単）の棒グラフを作成
+    fig4 = plt.figure(4)
+    ax_4 = fig4.add_subplot(1, 1, 1)
+    ax_4.bar(num_2t, count_2t)
 
     plt.show()
 

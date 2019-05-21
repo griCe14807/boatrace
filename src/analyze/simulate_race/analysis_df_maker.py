@@ -42,8 +42,8 @@ def make_df_of_a_day_odds(input_date, how_to_bet):
     :return:
 
     """
-    odds_summary_filename = input_date + "_odds3t.csv"
-    boatrace_odds_path = summarizer_motorboat_data_filename.return_directory_path("odds") + how_to_bet
+    odds_summary_filename = input_date + "_odds" + how_to_bet + ".csv"
+    boatrace_odds_path = summarizer_motorboat_data_filename.return_directory_path("odds") + how_to_bet + "/"
     odds_summary_file = os.path.join(boatrace_odds_path + odds_summary_filename)
     odds_summary_df = pd.read_csv(odds_summary_file)
 
@@ -51,15 +51,17 @@ def make_df_of_a_day_odds(input_date, how_to_bet):
 
 
 def make_df_of_a_day_simulation_result(input_date, how_to_bet):
-    simulation_result_filename = input_date + "_3t_simulationResult.csv"
-    simulation_result_path = summarizer_motorboat_data_filename.return_directory_path("simulationResults") + how_to_bet
+    # 3tは3tのまま、2tfがinputの時は2tという文字列に直したい
+    how_to_bet = how_to_bet[:2]
+    simulation_result_filename = input_date + "_" + how_to_bet + "_simulationResult.csv"
+    simulation_result_path = summarizer_motorboat_data_filename.return_directory_path("simulationResults") + how_to_bet +"/"
     simulation_result_file = os.path.join(simulation_result_path + simulation_result_filename)
     simulation_result_df = pd.read_csv(simulation_result_file)
 
     return simulation_result_df
 
 
-def main(input_date):   # inputをoption化すること。
+def main(input_date, how_to_bet):   # inputをoption化すること。
     """
     oddsのファイル、race resultのファイル、シミュレーション結果のファイルから、それらを統合した下記のcolumnを持つdfを作成。
     [レース番号など、組み番、オッズ、シミュレーションから求まった確率、実際のあたりor外れ]
@@ -67,12 +69,12 @@ def main(input_date):   # inputをoption化すること。
 
     """
     # 読み込み先のファイルを指定
-    the_boatrace_odds_path = r"/Users/grice/mywork/Gambling/data/boatRace/results_odds/odds3t/"
-    the_simulation_result_path = r"/Users/grice/mywork/Gambling/data/boatRace/analyze/simulation_results_csv/3t/"
+    the_boatrace_odds_path = r"/Users/grice/mywork/boatrace/data/boatRace/results_odds/odds3t/"
+    the_simulation_result_path = r"/Users/grice/mywork/boatrace/data/boatRace/simulation/simulation_results_csv/3t/"
 
     # TODO: ここはoptionで選択できるようにする
-    the_odds_summary_df = make_df_of_a_day_odds(input_date, "3t")
-    the_simulation_result_df = make_df_of_a_day_simulation_result(input_date, "3t")
+    the_odds_summary_df = make_df_of_a_day_odds(input_date, how_to_bet)
+    the_simulation_result_df = make_df_of_a_day_simulation_result(input_date, how_to_bet)
 
     # oddsとシミュレーション結果のdfを結合
     for_analysis_df = pd.merge(the_odds_summary_df, the_simulation_result_df, on=["日付", "レース場", "レース", "組番"], how="left")

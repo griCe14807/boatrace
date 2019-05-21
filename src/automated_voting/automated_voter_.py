@@ -6,7 +6,7 @@ import sys
 import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, 'crawl/'))
-sys.path.append(os.path.join(current_dir, 'analyze/'))
+sys.path.append(os.path.join(current_dir, 'simulation/'))
 
 # my module
 import summarizer_motorboat_data_filename
@@ -168,4 +168,5 @@ else:
     try:
         bet_using_selenium(KanyusyaNo, AnsyoNo, PassWord, the_jcd, bet_amount, the_bet_list)
     except:
+        time.sleep(10)
         bet_using_selenium(KanyusyaNo, AnsyoNo, PassWord, the_jcd, bet_amount, the_bet_list)

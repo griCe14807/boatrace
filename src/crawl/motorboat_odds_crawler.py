@@ -6,8 +6,7 @@ import itertools
 import sys
 import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(current_dir, '..'))
-sys.path.append(os.path.join(current_dir, '../analyze/'))
+sys.path.append(os.path.join(current_dir, '../conf/'))
 
 # my module
 import boatrace_crawler_conf
@@ -67,11 +66,11 @@ def extract_from_exacta(soup):
     :return odds_list: [投票番号, 最終オッズ]のリストを全組み合わせについて格納したリスト
     """
 
-    set_number_list = [" 1-2", " 5-1", " 6-1", " 2-1", " 3-1", " 4-1",
-                       " 1-3", " 5-2", " 6-2", " 2-3", " 3-2", " 4-2",
-                       " 1-4", " 5-3", " 6-3", " 2-4", " 3-4", " 4-3",
-                       " 1-5", " 5-4", " 6-4", " 2-5", " 3-5", " 4-5",
-                       " 1-6", " 5-6", " 6-5", " 2-6", " 3-6", " 4-6",
+    set_number_list = [" 1-2", " 2-1", " 3-1", " 4-1", " 5-1", " 6-1",
+                       " 1-3", " 2-3", " 3-2", " 4-2", " 5-2", " 6-2",
+                       " 1-4", " 2-4", " 3-4", " 4-3", " 5-3", " 6-3",
+                       " 1-5", " 2-5", " 3-5", " 4-5", " 5-4", " 6-4",
+                       " 1-6", " 2-6", " 3-6", " 4-6", " 5-6", " 6-5",
                        ]
 
     #place bed (勝式)
@@ -123,6 +122,12 @@ def convert_into_dataframe(hd, jcd, rno, place_bed, odds_list):
 
     return new_odds_df
 
+def get_extractor():
+
+    return {"odds3t": {"extractor": extract_from_trifecta},
+            "odds2tf": {"extractor": extract_from_exacta}
+            }
+
 
 def main(rno, jcd, hd, how_to_bet):
     # クロール対象サイトのurl作成
@@ -131,11 +136,12 @@ def main(rno, jcd, hd, how_to_bet):
 
     # 対象サイトをパースしてcrawl
     soup = boatrace_crawler_conf.html_parser(odds_url)
-    # extractor = get_extractor()
-    place_bed, odds_list = extract_from_trifecta(soup)
+    the_extractor = get_extractor()[how_to_bet]["extractor"]
+    place_bed, odds_list = the_extractor(soup)
 
     # dataframeとして格納
     new_odds_summary_df = convert_into_dataframe(hd, jcd, rno, place_bed, odds_list)
+    print(new_odds_summary_df)
 
     return new_odds_summary_df
 
@@ -145,7 +151,9 @@ if __name__ == "__main__":
 
     #### input 指定した期日に行われたレースをcrawle ######
 
-    the_hd = '2019/05/07'
+
+    the_hd = '2019/05/16'
+    # how_to_betは "odds3t" もしくは　"odds2tf"
     how_to_bet = "odds3t"
 
     # race noのリスト
@@ -164,8 +172,15 @@ if __name__ == "__main__":
         try:
             this_odds_summary_df = main(the_rno, the_jcd, the_hd, how_to_bet)
 
+            # 3連単的中番号
+            the_result_number = extract_raceresults(the_rno, the_jcd, the_hd)
+            # 2連単的中番号
+            if how_to_bet == "odds2tf":
+                the_result_number = the_result_number[:-2]
+            print("的中番号は{0}".format(the_result_number))
+
             # 的中カラムを作成。的中は1, 外れは0
-            this_odds_summary_df["的中"] = this_odds_summary_df["組番"] == extract_raceresults(the_rno, the_jcd, the_hd)
+            this_odds_summary_df["的中"] = this_odds_summary_df["組番"] == the_result_number
 
             the_odds_summary_df_list.append(this_odds_summary_df)
 

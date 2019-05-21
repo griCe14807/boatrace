@@ -8,7 +8,7 @@ import sys
 import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, 'crawl/'))
-sys.path.append(os.path.join(current_dir, 'analyze/'))
+sys.path.append(os.path.join(current_dir, 'simulation/'))
 
 # my module
 import boatrace_crawler_conf
@@ -51,7 +51,7 @@ def cron_generater():
 if __name__ == "__main__":
 
     # input
-    the_hd = "2019/05/07"
+    the_hd = "2019/05/11"
 
     # race noは1固定でOK
     the_rno = "1R"
@@ -87,14 +87,14 @@ if __name__ == "__main__":
         closing_time_min = int(rows["締め切り時刻"][3:5])
         closing_time_hour = int(rows["締め切り時刻"][0:2])
         # 11じ1分など、3分前だと時間まで変わるやつらの対応
-        if closing_time_min < 3:
-            conduction_time_min = str(60 + closing_time_min -3)
-            conduction_time_hour = str(closing_time_hour -1)
+        if closing_time_min < 2:
+            conduction_time_min = str(60 + closing_time_min - 2)
+            conduction_time_hour = str(closing_time_hour - 1)
         else:
-            conduction_time_min = str(closing_time_min -3)
+            conduction_time_min = str(closing_time_min - 2)
             conduction_time_hour = str(closing_time_hour)
         conduction_time = conduction_time_min + " " + conduction_time_hour + " * * * "
-        command = "bash -l -c " + "'python3 /Users/grice/mywork/Gambling/src/boatRace/automated_voter_.py -rno " +\
+        command = "bash -l -c " + "'python3 /Users/grice/mywork/boatrace/src/boatRace/automated_voter_.py -rno " +\
                   rows["レースナンバー"] + " -jcd " + rows["会場"] + " -hd " + rows["日付"] + "';"
         cron = conduction_time + command
         print(cron)
