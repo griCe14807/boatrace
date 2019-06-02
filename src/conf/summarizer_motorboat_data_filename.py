@@ -37,8 +37,8 @@ def make_csv_voting_result():
 
 
 def make_csv_for_analysis():
-    for_analysis_csv_path = r"/Users/grice/mywork/boatrace/data/boatRace/simulation/"
-    for_analysis_csv_filename = "boatrace_summary.csv"
+    for_analysis_csv_path = r"/Users/grice/mywork/boatrace/data/analysis/"
+    for_analysis_csv_filename = "race_result_summary.csv"
     for_analysis_csv_file = os.path.join(for_analysis_csv_path, for_analysis_csv_filename)
 
     return for_analysis_csv_file

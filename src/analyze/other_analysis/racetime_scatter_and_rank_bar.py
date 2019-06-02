@@ -1,6 +1,7 @@
 # -*- coding=utf8 =*-
 
 """
+新しい特徴量を生み出すことはせず、
 
 """
 
@@ -43,9 +44,9 @@ if __name__ == "__main__":
 
     ################inputs#################
 
-    rno = "1R"
-    jcd = "福　岡"
-    hd = "2019/05/22"
+    rno = "12R"
+    jcd = "桐　生"
+    hd = "2019/06/02"
 
     # 過去のレース結果をdfとして取得
     the_raceresult_summary_df = csv_loader.load_all_raceResults_as_a_df()

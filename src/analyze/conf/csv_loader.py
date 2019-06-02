@@ -50,10 +50,17 @@ def load_all_raceResults_as_a_df():
         race_results_df["スタートタイム_{0}".format(i)] = race_results_df["スタートタイム_{0}".format(i)].astype(str)
         # フライング, Lateがあったレースのデータは取り除く
         race_results_df = race_results_df[~(race_results_df["スタートタイム_{0}".format(i)].str.contains("|".join(searchfor), na=False))]
+
         # start timeもfloatに。
         race_results_df["starttime_float_{0}".format(i)] = race_results_df["スタートタイム_{0}".format(i)].map(float)
 
+        # レース（12Rとか）もfloatに
+        race_results_df["race_float"] = race_results_df["レース"].map(lambda x: x[:-1])
+        race_results_df["race_float"] = race_results_df["race_float"].map(float)
+
     return race_results_df
+
+
 
 
 if __name__ == "__main__":
