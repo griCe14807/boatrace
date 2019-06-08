@@ -5,20 +5,15 @@
 (4) RaceResults.load() will parse the text files
 """
 
-import numpy as np
 import pandas as pd
 import urllib
 import os
 import time
-import glob
-import collections
-import re
 # import patoolib
 
 class RaceResults:
     def __init__(self):
         self.baseuri = "http://www1.mbrace.or.jp/od2/K/%s/k%s.lzh" # http://www1.mbrace.or.jp/od2/K/201612/k161201.lzh
-        self.results = pd.DataFrame(race_result_dict) # List of (Racers, 1-2-3)
         self.id2index = None
 
     def download(self, start, end):
@@ -29,7 +24,7 @@ class RaceResults:
             dirname = date.strftime("%Y%m")
             lzhname = date.strftime("%y%m%d")
             uri = self.baseuri % (dirname, lzhname)
-            savename = "./data/results/lzh/%s.lzh" % lzhname
+            savename = "/Users/grice/mywork/boatrace/data/results_race/lzh/%s.lzh" % lzhname
             if not os.path.exists(savename):
                 print("Send request to", uri)
                 urllib.request.urlretrieve(uri, savename)
@@ -43,4 +38,6 @@ class RaceResults:
             #     patoolib.extract_archive(savename, outdir="./data/results")
 
 if __name__ == "__main__":
+    r = RaceResults()
+    r.download("2019-03-01", "2019-04-30")
 

@@ -9,7 +9,7 @@ windows-macのそれぞれでいじる際、ファイルごとにパスを変え
 def return_directory_path(key):
     directory_path_dict = {"odds": r"/Users/grice/mywork/boatrace/data/results_odds/",
                            "simulationResults": r"/Users/grice/mywork/boatrace/data/simulation/simulation_results_csv/",
-                           "raceResults": r"/Users/grice/mywork/boatrace/data/results_race"
+                           "raceResults": r"/Users/grice/mywork/boatrace/data/results_race/crawled"
                            }
 
     return directory_path_dict[key]

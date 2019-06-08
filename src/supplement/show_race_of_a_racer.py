@@ -18,7 +18,7 @@ import boatrace_crawler_conf
 
 
 if __name__ == "__main__":
-    racer = "吉川\u3000\u3000元浩"
+    racer = "石田\u3000\u3000政吾"
     # 過去のレース結果をdfとして取得
     the_raceresult_summary_df = csv_loader.load_all_raceResults_as_a_df()
     # plot用データを作成: racername+枠番でfiltering
