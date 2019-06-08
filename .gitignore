@@ -4,10 +4,17 @@
 .#*
 
 # Data
-data/
+data/参考資料
+data/analysis
+data/deadline_time
+data/results_odds
+data/results_race
+data/results_voting
+data/simulation
 
 # Other
 .DS_Store
 
 # pycharm
 .idea/
+__pycache__/

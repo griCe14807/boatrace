@@ -1,5 +1,3 @@
-# Gambling
-
 ## How to use
 #### データ準備
 - downloader_race_resultsを実行し、レース結果をダウンロード(./boatrace/data/results_race/lzh)にダウンロードされます
