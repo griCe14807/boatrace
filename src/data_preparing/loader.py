@@ -11,6 +11,7 @@ import re
 from datetime import datetime
 
 
+
 def load_race_results():
 
     # loadした結果を格納するための辞書を作成（最後はpandas.DataFrameにします）
@@ -55,7 +56,7 @@ def load_race_results():
         race_result_dict["raceTime_{0}".format(i)] = []
 
     # レース結果のテキストファイルを読み込み、辞書に格納していく
-    for filename in glob.glob("/Users/grice/mywork/boatrace/data/results_race/K1*.TXT"):
+    for filename in glob.glob("../../data/results_race/K1*.TXT"):
         with open(filename, "r", encoding="shift_jis") as f:
             result_ = f.read()
 
@@ -280,7 +281,7 @@ def load_racer_data():
         racer_dict["numS2_{0}".format(i)] = []
 
 
-    for filename in glob.glob("/Users/grice/mywork/boatrace/data/racer/fan*.txt"):
+    for filename in glob.glob("../../data/racer/fan*.txt"):
         with open(filename, "r", encoding="shift_jis") as f:
             for line in f:
                 racer_dict["racerId"].append(line[0:4])
@@ -355,8 +356,7 @@ def load_analysis_df():
 if __name__ == "__main__":
 
     the_race_result_df = load_race_results()
-    print(the_race_result_df[(the_race_result_df["raceNumber"] == 12) & (the_race_result_df["venue"] == "桐　生")]["racerName_1"])
-    print(the_race_result_df.dtypes)
+    print(the_race_result_df)
 
     # racer_df = load_racer_data()
     # print(racer_df[["pre_pre_pre_class", "year", "dateFrom", "dateTo", "schoolYear", "homeTown"]])
