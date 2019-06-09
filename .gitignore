@@ -18,3 +18,6 @@ data/simulation
 # pycharm
 .idea/
 __pycache__/
+
+# jupyter notebook
+.ipynb_checkpoints/
