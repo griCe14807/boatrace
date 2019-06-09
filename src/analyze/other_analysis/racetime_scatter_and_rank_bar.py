@@ -35,9 +35,29 @@ def crawle_race_list(soup):
         racer_name = row.find(class_="is-fs18 is-fBold").text[1:-1]
         # race_result_listの要素としてクロールした結果のリストを追加
         racer_list.append(racer_name)
-    print(racer_list)
 
-    return racer_list
+        # racerの書式をダウンロードファイルに合わせる
+        racer_list_mod = []
+        for racer_ in racer_list:
+            racer_ = racer_.split("\u3000")
+            if len(racer_[0]) == 1:
+                racer_[0] = racer_[0] + "\u3000\u3000"
+            elif len(racer_[0]) == 2:
+                racer_[0] = racer_[0][0] + "\u3000" + racer_[0][1]
+
+            if len(racer_[-1]) == 1:
+                racer_[-1] == "\u3000\u3000" + racer_[-1]
+                racer = racer_[0] + "\u3000\u3000\u3000\u3000" + racer_[-1]
+
+            elif len(racer_[-1]) == 2:
+                racer_[-1] = racer_[-1][0] + "\u3000" + racer_[-1][1]
+                racer = racer_[0] + "\u3000\u3000" + racer_[-1]
+
+            racer_list_mod.append(racer)
+
+    print(racer_list_mod)
+
+    return racer_list_mod
 
 
 
@@ -45,37 +65,18 @@ if __name__ == "__main__":
 
     ################inputs#################
 
-    rno = "10R"
-    jcd = "桐　生"
-    hd = "2019/06/05"
+    rno = "12R"
+    jcd = "住之江"
+    hd = "2019/06/09"
 
     # 過去のレース結果をdfとして取得
     the_race_result_df = loader.load_race_results()
+    print(the_race_result_df)
 
     #  Filteringを行うためのレーサーネームをcrawle
     raceList_url = boatrace_crawler_conf.make_url("racelist", rno, jcd, hd)
     soup = boatrace_crawler_conf.html_parser(raceList_url)
-    racer_list_ = crawle_race_list(soup)
-
-    # racerの書式をダウンロードファイルに合わせる
-    racer_list = []
-    for racer_ in racer_list_:
-        racer_ = racer_.split("\u3000")
-        if len(racer_[0]) == 1:
-            racer_[0] = racer_[0] + "\u3000\u3000"
-        elif len(racer_[0]) == 2:
-            racer_[0] = racer_[0][0] + "\u3000" + racer_[0][1]
-
-        if len(racer_[-1]) == 1:
-            racer_[-1] == "\u3000\u3000" + racer_[-1]
-            racer = racer_[0] + "\u3000\u3000\u3000\u3000" + racer_[-1]
-
-        elif len(racer_[-1]) == 2:
-            racer_[-1] = racer_[-1][0] + "\u3000" + racer_[-1][1]
-            racer = racer_[0] + "\u3000\u3000" + racer_[-1]
-
-        racer_list.append(racer)
-
+    racer_list = crawle_race_list(soup)
 
     # 散布図
     plt.rcParams['font.family'] = 'Hiragino Sans'
@@ -91,7 +92,6 @@ if __name__ == "__main__":
     for i, racer in enumerate(racer_list, 1):
         # plot用データを作成: racername+枠番でfiltering
         filtered_df = the_race_result_df[the_race_result_df["racerName_{0}".format(i)] == racer]
-        print(racer)
         print(filtered_df[["racerName_{0}".format(i), "date", "venue", "raceNumber", "rank_{0}".format(i), "startTime_{0}".format(i)]])
 
         # 散布図を作成 (日付 vs racetime)

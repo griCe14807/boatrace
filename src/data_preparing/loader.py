@@ -9,7 +9,7 @@ import pandas as pd
 import glob
 import re
 from datetime import datetime
-
+import os
 
 
 def load_race_results():
@@ -56,7 +56,7 @@ def load_race_results():
         race_result_dict["raceTime_{0}".format(i)] = []
 
     # レース結果のテキストファイルを読み込み、辞書に格納していく
-    for filename in glob.glob("../../data/results_race/K1*.TXT"):
+    for filename in glob.glob(race_results_file_path):
         with open(filename, "r", encoding="shift_jis") as f:
             result_ = f.read()
 
@@ -226,6 +226,8 @@ def load_race_results():
 
     return race_result_df
 
+
+
 def load_racer_data():
     racer_dict = {"racerId": [],
                   "racerName_ch": [],
@@ -281,9 +283,10 @@ def load_racer_data():
         racer_dict["numS2_{0}".format(i)] = []
 
 
-    for filename in glob.glob("../../data/racer/fan*.txt"):
+    for filename in glob.glob(racer_file_path):
         with open(filename, "r", encoding="shift_jis") as f:
-            for line in f:
+            results = f.read().splitlines()[:-1]
+            for line in results:
                 racer_dict["racerId"].append(line[0:4])
                 racer_dict["racerName_ch"].append(line[4:12])
                 racer_dict["racername_ja"].append(line[12:27])
@@ -341,22 +344,51 @@ def load_racer_data():
                     racer_dict["numS1_{0}".format(i)].append(line[184+34*i: 186+34*1])
                     racer_dict["numS2_{0}".format(i)].append(line[186+34*i: 188+34*1])
 
-
     racer_df = pd.DataFrame(racer_dict)
+    racer_df = racer_df.set_index("racerId")
 
     return racer_df
 
-def load_analysis_df():
-    race_result_df = load_race_results()
+
+def make_merged_df():
+    merged_df = load_race_results()
     racer_df = load_racer_data()
 
-    analysis_df = pd.merge(race_result_df, racer_df, on=[], how=left)
+    # merged dfにするにあたって追加する列ラベルを作成
+    new_columns = []
+    for i in range(1, 7):
+        new_columns.append("racerClass_{0}".format(i))
+        new_columns.append("aveST_{0}".format(i))
+
+    # データは空で、dfに列を追加
+    for new_column in new_columns:
+        merged_df[new_column] = None
+
+    for index, row in merged_df.iterrows():
+        for i in range(1, 7):
+            # 各枠の選手番号を読んでindexとして用いる
+            racer_id = row["racerId_{0}".format(i)]
+
+            # merged dfに列を追加
+            racer_series = racer_df.loc[racer_id]
+            merged_df["racerClass_{0}".format(i)][index] = racer_series["class"]  # クラス
+            merged_df["aveST_{0}".format(i)] = racer_series["aveST"]  # 平均ST
+
+    return merged_df
+
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+race_results_file_path = os.path.join(current_dir, '../../data/results_race/K1*.TXT')
+racer_file_path = os.path.join(current_dir, "../../data/racer/fan*.txt")
 
 
 if __name__ == "__main__":
 
-    the_race_result_df = load_race_results()
-    print(the_race_result_df)
+    # the_race_result_df = load_race_results()
+    # print(the_race_result_df)
 
     # racer_df = load_racer_data()
     # print(racer_df[["pre_pre_pre_class", "year", "dateFrom", "dateTo", "schoolYear", "homeTown"]])
+
+    the_merged_df = make_merged_df()
+    print(the_merged_df[["date", "racerName_1", "racerClass_1"]])
