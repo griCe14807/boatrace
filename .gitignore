@@ -20,4 +20,4 @@ data/simulation
 __pycache__/
 
 # jupyter notebook
-# .ipynb_checkpoints/
+.ipynb_checkpoints/
