@@ -1,12 +1,18 @@
 競艇のデータ解析をするためのプロジェクト
 
 ## How to use
-### データ準備概要
-`./src/data_preparing/make_merged_df`を実行すると2019年1月-6月のレース結果と一部の統計情報をまとめたdfがロードできます．
+### Demo
 
-使い方の例として `src/analysis/k-NN.ipynb` を参考に．
+`git clone https://github.com/griCe14807/boatrace.git`
 
-#### データ準備詳細
+jupyter notebookを用いて，下記のファイルを実行．
+
+`racertime_scatter_and_rank_bar.ipynb`: 対象レースに対して，出場レーサーのこれまでのタイムを散布図にplot
+
+`src/analysis/k-NN.ipynb`: 一枠の選手が一着になるかどうかをk-NNを用いて予想．
+
+
+### データ準備
 - レース結果
 1. `downloader_race_results.py`
 を実行し、レース結果をダウンロード. 
