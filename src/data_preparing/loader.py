@@ -129,7 +129,7 @@ def load_race_results():
                         trio_number = payoff_result[8][14:19]  # ３連複
                         trio_payoff = int(payoff_result[8][23:28])
 
-                        print(hd, jcd, race, weather, wind_dir, wind_power, wave, ruler)
+                        # print(hd, jcd, race, weather, wind_dir, wind_power, wave, ruler)
 
                         """
                         print(win_number, win_payoff, place_number_1, place_payoff_1, place_number_2, place_payoff_2,
@@ -330,9 +330,9 @@ def load_racer_data():
 
                 for i in range(1, 7):
                     racer_dict["numFrame{0}".format(i)].append(line[59+13*i:62+13*i])   # i = 1の時は72:75 2だと85:
-                    racer_dict["placeRate_frame{0}".format(i)].append(line[62+13*i:66+13*i])   # i = 1の時は75:79
-                    racer_dict["aveST_frame{0}".format(i)].append(line[66+13*i:69+13*i])
-                    racer_dict["aveSR_frame{0}".format(i)].append(line[69+13*i: 72+13*i])
+                    racer_dict["placeRate_frame{0}".format(i)].append(int(line[62+13*i:66+13*i]))   # i = 1の時は75:79
+                    racer_dict["aveST_frame{0}".format(i)].append(int(line[66+13*i:69+13*i]))
+                    racer_dict["aveSR_frame{0}".format(i)].append(int(line[69+13*i: 72+13*i]))
                     for j in range(1, 7):
                         racer_dict["num_rank_{0}_frame_{1}".format(j, i)].append((line[151+34*i+3*j: 154+34*i+3*j]))
                     racer_dict["numF_{0}".format(i)].append(line[172+34*i: 174+34*1])
@@ -354,25 +354,16 @@ def make_merged_df():
     merged_df = load_race_results()
     racer_df = load_racer_data()
 
-    # merged dfにするにあたって追加する列ラベルを作成
-    new_columns = []
     for i in range(1, 7):
-        new_columns.append("racerClass_{0}".format(i))
-        new_columns.append("aveST_{0}".format(i))
+        # 枠ごとの平均スタート順位，枠ごとの連帯率をマージ
+        # TODO: ここは，とりあえずあるデータをすべてマージしたものを返す関数にするか，inputで指定できるようにするかを決め，そのように作る．
+        for_merge_df = racer_df[["racerName_ch",
+                                 "aveST_frame{0}".format(i),
+                                 "placeRate_frame{0}".format(i)]]
 
-    # データは空で、dfに列を追加
-    for new_column in new_columns:
-        merged_df[new_column] = None
-
-    for index, row in merged_df.iterrows():
-        for i in range(1, 7):
-            # 各枠の選手番号を読んでindexとして用いる
-            racer_id = row["racerId_{0}".format(i)]
-
-            # merged dfに列を追加
-            racer_series = racer_df.loc[racer_id]
-            merged_df["racerClass_{0}".format(i)][index] = racer_series["class"]  # クラス
-            merged_df["aveST_{0}".format(i)] = racer_series["aveST"]  # 平均ST
+        # マージする際のkeyはとりあえず名前にした（ほんとはIDのほうがいい）
+        merged_df = pd.merge(merged_df, for_merge_df, how="left",
+                             left_on="racerName_{0}".format(i), right_on="racerName_ch")
 
     return merged_df
 
@@ -384,11 +375,11 @@ racer_file_path = os.path.join(current_dir, "../../data/racer/fan*.txt")
 
 if __name__ == "__main__":
 
-    # the_race_result_df = load_race_results()
+    the_race_result_df = load_race_results()
     # print(the_race_result_df)
 
-    # racer_df = load_racer_data()
-    # print(racer_df[["pre_pre_pre_class", "year", "dateFrom", "dateTo", "schoolYear", "homeTown"]])
+    racer_df = load_racer_data()
+    print(racer_df[["placeRate_frame1", "aveST_frame1"]].dtypes)
 
-    the_merged_df = make_merged_df()
-    print(the_merged_df[["date", "racerName_1", "racerClass_1"]])
+    # the_merged_df = make_merged_df()
+    # print(the_merged_df[["racerName_1", "aveST_frame1", "placeRate_frame1", "racerName_2", "aveST_frame2", "placeRate_frame2"]])
