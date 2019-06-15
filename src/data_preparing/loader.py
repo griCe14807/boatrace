@@ -358,8 +358,13 @@ def make_merged_df():
         # 枠ごとの平均スタート順位，枠ごとの連帯率をマージ
         # TODO: ここは，とりあえずあるデータをすべてマージしたものを返す関数にするか，inputで指定できるようにするかを決め，そのように作る．
         for_merge_df = racer_df[["racerName_ch",
+                                 "class",
                                  "aveST_frame{0}".format(i),
-                                 "placeRate_frame{0}".format(i)]]
+                                 "placeRate_frame{0}".format(i)
+                                 ]]
+
+        # レーサー名に対して一つしかないカラムたちは枠版を付けたカラム名に変更
+        for_merge_df = for_merge_df.rename(columns={'class': 'class_{0}'.format(i)})
 
         # マージする際のkeyはとりあえず名前にした（ほんとはIDのほうがいい）
         merged_df = pd.merge(merged_df, for_merge_df, how="left",
@@ -375,11 +380,11 @@ racer_file_path = os.path.join(current_dir, "../../data/racer/fan*.txt")
 
 if __name__ == "__main__":
 
-    the_race_result_df = load_race_results()
+    # the_race_result_df = load_race_results()
     # print(the_race_result_df)
 
-    racer_df = load_racer_data()
-    print(racer_df[["placeRate_frame1", "aveST_frame1"]].dtypes)
+    # racer_df = load_racer_data()
+    # print(racer_df[["placeRate_frame1", "aveST_frame1"]].dtypes)
 
-    # the_merged_df = make_merged_df()
-    # print(the_merged_df[["racerName_1", "aveST_frame1", "placeRate_frame1", "racerName_2", "aveST_frame2", "placeRate_frame2"]])
+    the_merged_df = make_merged_df()
+    print(the_merged_df[["racerName_1", "class_1", "aveST_frame1", "placeRate_frame1", "racerName_2", "aveST_frame2", "placeRate_frame2"]])
