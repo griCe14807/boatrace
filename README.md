@@ -13,6 +13,7 @@ jupyter notebookを用いて，下記のファイルを実行．
 
 
 ### データ準備
+※ `git clone` した場合は，上記ディレクトリにもともと19年1月から6月までのデータがダウンロードしてあります．
 - レース結果
 1. `downloader_race_results.py`
 を実行し、レース結果をダウンロード. 
@@ -24,7 +25,7 @@ jupyter notebookを用いて，下記のファイルを実行．
 1. `https://www.boatrace.jp/owpc/pc/extra/data/download.html`からレーサー期別成績をダウンロード（手動）し，`.boatrace\data\racer`へ格納
 2. `race_results_loader.`を実行し，レース結果をdfにロード
 
-※ `git clone` した場合は，上記ディレクトリにもともと19年1月から6月までのデータがダウンロードしてあります．
+※ロードしたデータフレームのカラム名とデータの対応は`\column_descriptions.xlsx`にまとめられている.
 
 ※ `race_results_loader` には，レース結果のみをロードする`load_race_results`, 
 レーサー情報のみをロードする`load_racer_data`もありますが，
