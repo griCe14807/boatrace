@@ -30,6 +30,7 @@ def standerdize_feature_values(input_df, column_list_label):
     :return:
     """
     df_std = input_df.drop(column_list_label, axis=1)
+    print(df_std)
     df_std = (df_std - df_std.mean()) / df_std.std()
     df_std[column_list_label] = input_df[column_list_label]
     # print(for_analysis_df_std)
