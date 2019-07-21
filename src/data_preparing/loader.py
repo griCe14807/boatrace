@@ -51,7 +51,7 @@ def load_race_results():
         race_result_dict["motor_{0}".format(i)] = []
         race_result_dict["boat_{0}".format(i)] = []
         race_result_dict["exhibitionTime_{0}".format(i)] = []
-        race_result_dict["exhibitionRank_{0}".format(i)] = []
+        race_result_dict["cource_{0}".format(i)] = []
         race_result_dict["startTime_{0}".format(i)] = []
         race_result_dict["raceTime_{0}".format(i)] = []
 
@@ -163,11 +163,11 @@ def load_race_results():
                                 exhibition_time = None
                             else:
                                 exhibition_time = float(racer_result[31:35])   # 展示タイム
-                            # 展示順位がない場合
+                            # 進入コースがない場合
                             if racer_result[38] == " ":
-                                exhibition_rank = None
+                                cource = None
                             else:
-                                exhibition_rank = int(racer_result[38])  # 展示順位
+                                cource = int(racer_result[38])  # 進入コース
 
                             # レースタイム
                             race_time = racer_result[52: 58].split(".")
@@ -176,7 +176,7 @@ def load_race_results():
                             else:
                                 race_time = int(race_time[0]) * 60 + int(race_time[1]) + int(race_time[2]) / 100
 
-                        # print(rank, frame, racer_id, racer_name, motor, boat, exhibition_time, exhibition_rank, start_time, race_time)
+                        # print(rank, frame, racer_id, racer_name, motor, boat, exhibition_time, cource, start_time, race_time)
 
                             # 辞書に格納
                             race_result_dict["rank_{0}".format(frame)].append(rank)
@@ -185,7 +185,7 @@ def load_race_results():
                             race_result_dict["motor_{0}".format(frame)].append(motor)
                             race_result_dict["boat_{0}".format(frame)].append(boat)
                             race_result_dict["exhibitionTime_{0}".format(frame)].append(exhibition_time)
-                            race_result_dict["exhibitionRank_{0}".format(frame)].append(exhibition_rank)
+                            race_result_dict["cource_{0}".format(frame)].append(cource)
                             race_result_dict["startTime_{0}".format(frame)].append(start_time)
                             race_result_dict["raceTime_{0}".format(frame)].append(race_time)
 
@@ -283,77 +283,88 @@ def load_racer_data():
         racer_dict["numS2_{0}".format(i)] = []
 
 
-    for filename in glob.glob(racer_file_path):
-        with open(filename, "r", encoding="shift_jis") as f:
-            results = f.read().splitlines()[:-1]
-            for line in results:
-                racer_dict["racerId"].append(line[0:4])
-                racer_dict["racerName_ch"].append(line[4:12])
-                racer_dict["racername_ja"].append(line[12:27])
-                racer_dict["branch"].append(line[27:29])
-                racer_dict["class"].append(line[29:31])
-                racer_dict["era"].append(line[31])
-                racer_dict["birth"].append(line[32:38])
-                racer_dict["sex"].append(line[38])
-                racer_dict["age"].append(line[39:41])
-                racer_dict["hight"].append(line[41:44])
-                racer_dict["weight"].append(line[44:46])
-                racer_dict["bloodType"].append(line[46:48])
-                racer_dict["winRate"].append(line[48:52])
-                racer_dict["placeRate"].append(line[52:56])
-                racer_dict["numWin"].append(line[56:59])
-                racer_dict["numSecond"].append(line[59:62])
-                racer_dict["numRace"].append(line[62:65])
-                racer_dict["numParticipate"].append(line[65:67])
-                racer_dict["numVictory"].append(line[67:69])
-                racer_dict["aveST"].append(line[69:72])
+    with open(racer_filename, "r", encoding="shift_jis") as f:
+        results = f.read().splitlines()[:-1]
+        for line in results:
+            racer_dict["racerId"].append(line[0:4])
+            racer_dict["racerName_ch"].append(line[4:12])
+            racer_dict["racername_ja"].append(line[12:27])
+            racer_dict["branch"].append(line[27:29])
+            racer_dict["class"].append(line[29:31])
+            racer_dict["era"].append(line[31])
+            racer_dict["birth"].append(line[32:38])
+            racer_dict["sex"].append(line[38])
+            racer_dict["age"].append(line[39:41])
+            racer_dict["hight"].append(line[41:44])
+            racer_dict["weight"].append(line[44:46])
+            racer_dict["bloodType"].append(line[46:48])
+            racer_dict["winRate"].append(line[48:52])
+            racer_dict["placeRate"].append(line[52:56])
+            racer_dict["numWin"].append(line[56:59])
+            racer_dict["numSecond"].append(line[59:62])
+            racer_dict["numRace"].append(line[62:65])
+            racer_dict["numParticipate"].append(line[65:67])
+            racer_dict["numVictory"].append(line[67:69])
+            racer_dict["aveST"].append(line[69:72])
 
-                racer_dict["pre_class"].append(line[150:152])
-                racer_dict["pre_pre_class"].append(line[152:154])
-                racer_dict["pre_pre_pre_class"].append(line[154:156])
-                racer_dict["pre_abilityValue"].append(line[156:160])
-                racer_dict["abilityValue"].append(line[160:164])
-                racer_dict["year"].append(line[164:168])
-                racer_dict["period"].append(line[168])
-                racer_dict["dateFrom"].append(line[169: 177])
-                racer_dict["dateTo"].append(line[177: 185])
-                racer_dict["schoolYear"].append(line[185: 188])
+            racer_dict["pre_class"].append(line[150:152])
+            racer_dict["pre_pre_class"].append(line[152:154])
+            racer_dict["pre_pre_pre_class"].append(line[154:156])
+            racer_dict["pre_abilityValue"].append(line[156:160])
+            racer_dict["abilityValue"].append(line[160:164])
+            racer_dict["year"].append(line[164:168])
+            racer_dict["period"].append(line[168])
+            racer_dict["dateFrom"].append(line[169: 177])
+            racer_dict["dateTo"].append(line[177: 185])
+            racer_dict["schoolYear"].append(line[185: 188])
 
-                racer_dict["numL0"].append(line[392: 394])
-                racer_dict["numL1"].append(line[394: 396])
-                racer_dict["numK0"].append(line[396: 398])
-                racer_dict["numK1"].append(line[398: 400])
-                racer_dict["homeTown"].append(line[400: 403])
+            racer_dict["numL0"].append(line[392: 394])
+            racer_dict["numL1"].append(line[394: 396])
+            racer_dict["numK0"].append(line[396: 398])
+            racer_dict["numK1"].append(line[398: 400])
+            racer_dict["homeTown"].append(line[400: 403])
 
-                # error見つけ用
-                # print(racer_dict["racerName_ch"])
+            # error見つけ用
+            # print(racer_dict["racerName_ch"])
 
-                for i in range(1, 7):
-                    racer_dict["numFrame{0}".format(i)].append(line[59+13*i:62+13*i])   # i = 1の時は72:75 2だと85:
-                    racer_dict["placeRate_frame{0}".format(i)].append(int(line[62+13*i:66+13*i]))   # i = 1の時は75:79
-                    racer_dict["aveST_frame{0}".format(i)].append(int(line[66+13*i:69+13*i]))
-                    racer_dict["aveSR_frame{0}".format(i)].append(int(line[69+13*i: 72+13*i]))
-                    for j in range(1, 7):
-                        racer_dict["num_rank_{0}_frame_{1}".format(j, i)].append((line[151+34*i+3*j: 154+34*i+3*j]))
-                    racer_dict["numF_{0}".format(i)].append(line[172+34*i: 174+34*1])
-                    racer_dict["numL0_{0}".format(i)].append(line[174+34*i: 176+34*1])
-                    racer_dict["numL1_{0}".format(i)].append(line[176+34*i: 178+34*1])
-                    racer_dict["numK0_{0}".format(i)].append(line[178+34*i: 180+34*1])
-                    racer_dict["numK1_{0}".format(i)].append(line[180+34*i: 182+34*1])
-                    racer_dict["numS0_{0}".format(i)].append(line[182+34*i: 184+34*1])
-                    racer_dict["numS1_{0}".format(i)].append(line[184+34*i: 186+34*1])
-                    racer_dict["numS2_{0}".format(i)].append(line[186+34*i: 188+34*1])
+            for i in range(1, 7):
+                racer_dict["numFrame{0}".format(i)].append(line[59+13*i:62+13*i])   # i = 1の時は72:75 2だと85:
+                racer_dict["placeRate_frame{0}".format(i)].append(int(line[62+13*i:66+13*i]))   # i = 1の時は75:79
+                racer_dict["aveST_frame{0}".format(i)].append(int(line[66+13*i:69+13*i]))
+                racer_dict["aveSR_frame{0}".format(i)].append(int(line[69+13*i: 72+13*i]))
+                for j in range(1, 7):
+                    racer_dict["num_rank_{0}_frame_{1}".format(j, i)].append((line[151+34*i+3*j: 154+34*i+3*j]))
+                racer_dict["numF_{0}".format(i)].append(line[172+34*i: 174+34*1])
+                racer_dict["numL0_{0}".format(i)].append(line[174+34*i: 176+34*1])
+                racer_dict["numL1_{0}".format(i)].append(line[176+34*i: 178+34*1])
+                racer_dict["numK0_{0}".format(i)].append(line[178+34*i: 180+34*1])
+                racer_dict["numK1_{0}".format(i)].append(line[180+34*i: 182+34*1])
+                racer_dict["numS0_{0}".format(i)].append(line[182+34*i: 184+34*1])
+                racer_dict["numS1_{0}".format(i)].append(line[184+34*i: 186+34*1])
+                racer_dict["numS2_{0}".format(i)].append(line[186+34*i: 188+34*1])
 
     racer_df = pd.DataFrame(racer_dict)
     racer_df = racer_df.set_index("racerId")
 
     return racer_df
 
+def load_race_results_supplementary_data():
+    race_results_supplementary_df_list = []
+    for filename in glob.glob(race_results_supplementary_path):
+        race_results_supplementary_df_ = pd.read_csv(filename, parse_dates=[0])
+        race_results_supplementary_df_list.append(race_results_supplementary_df_)
+
+    race_results_supplementary_df = pd.concat(race_results_supplementary_df_list)
+
+    return race_results_supplementary_df
+
 
 def make_merged_df():
     merged_df = load_race_results()
     racer_df = load_racer_data()
+    race_results_supplementary_df = load_race_results_supplementary_data()
 
+    # racer_dfのデータの一部をマージ
     for i in range(1, 7):
         # 枠ごとの平均スタート順位，枠ごとの連帯率をマージ
         # TODO: ここは，とりあえずあるデータをすべてマージしたものを返す関数にするか，inputで指定できるようにするかを決め，そのように作る．
@@ -366,25 +377,46 @@ def make_merged_df():
         # レーサー名に対して一つしかないカラムたちは枠版を付けたカラム名に変更
         for_merge_df = for_merge_df.rename(columns={'class': 'class_{0}'.format(i)})
 
-        # マージする際のkeyはとりあえず名前にした（ほんとはIDのほうがいい）
+        # レーサー名をkeyとしてマージ
+        # TODO: ほんとはracer IDのほうがいい
         merged_df = pd.merge(merged_df, for_merge_df, how="left",
                              left_on="racerName_{0}".format(i), right_on="racerName_ch")
+
+    # race_result supplementaryの一部をマージ
+    column_list_element1 = ["motor_place2Ratio_{0}".format(i) for i in range(1, 7)]
+    column_list_element2 = ["motor_place3Ratio_{0}".format(i) for i in range(1, 7)]
+    column_list_element3 = ["raceNumber", "venue", "date"]
+    column_list = column_list_element1 + column_list_element2+ column_list_element3
+
+    merged_df = pd.merge(merged_df,
+                         race_results_supplementary_df[column_list],
+                         how="left",
+                         on=["date", "venue", "raceNumber"]
+                             )
 
     return merged_df
 
 
+# ファイル保存先のパス。
+# TODO: モジュールとして呼び出された時も常に実行できるようにここに書いているけど関数にした方が良いかも？
 current_dir = os.path.dirname(os.path.abspath(__file__))
 race_results_file_path = os.path.join(current_dir, '../../data/results_race/K1*.TXT')
-racer_file_path = os.path.join(current_dir, "../../data/racer/fan*.txt")
+racer_filename = os.path.join(current_dir, "../../data/racer/fan1904.txt")
+race_results_supplementary_path = os.path.join(current_dir, "../../data/motor_and_boat/1*.csv")
 
 
 if __name__ == "__main__":
 
     # the_race_result_df = load_race_results()
-    # print(the_race_result_df)
+    # print(the_race_result_df[["date", "venue", "raceNumber"]])
 
-    # racer_df = load_racer_data()
-    # print(racer_df[["placeRate_frame1", "aveST_frame1"]].dtypes)
 
-    the_merged_df = make_merged_df()
-    print(the_merged_df[["racerName_1", "class_1", "aveST_frame1", "placeRate_frame1", "racerName_2", "aveST_frame2", "placeRate_frame2"]])
+    racer_df = load_racer_data()
+    print(racer_df[["dateFrom", "dateTo"]])
+
+    # the_race_results_supplementary_df = load_race_results_supplementary_data()
+    # print(the_race_results_supplementary_df)
+
+    # the_merged_df = make_merged_df()
+    # the_merged_df.to_csv("/Users/grice/mywork/boatrace/data/motor_and_boat/test<.csv")
+    # print(the_merged_df.columns)

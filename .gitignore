@@ -4,9 +4,13 @@
 .#*
 
 # dirctories
-automated_voting/
 old/
 supplement/
+
+# automated_voting
+automated_voting/automated_voter.py
+automated_voting/crontab_generater.py
+
 
 # Data
 data/参考資料
