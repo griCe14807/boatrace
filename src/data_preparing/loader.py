@@ -351,10 +351,11 @@ def load_racer_data():
 def load_race_results_supplementary_data():
     race_results_supplementary_df_list = []
     for filename in glob.glob(race_results_supplementary_path):
-        race_results_supplementary_df_ = pd.read_csv(filename, parse_dates=[0])
+        race_results_supplementary_df_ = pd.read_csv(filename)
         race_results_supplementary_df_list.append(race_results_supplementary_df_)
 
     race_results_supplementary_df = pd.concat(race_results_supplementary_df_list)
+    race_results_supplementary_df["date"] = pd.to_datetime(race_results_supplementary_df["date"])
 
     return race_results_supplementary_df
 
@@ -411,12 +412,12 @@ if __name__ == "__main__":
     # print(the_race_result_df[["date", "venue", "raceNumber"]])
 
 
-    racer_df = load_racer_data()
-    print(racer_df[["dateFrom", "dateTo"]])
+    # racer_df = load_racer_data()
+    # print(racer_df[["dateFrom", "dateTo"]])
 
     # the_race_results_supplementary_df = load_race_results_supplementary_data()
     # print(the_race_results_supplementary_df)
 
-    # the_merged_df = make_merged_df()
-    # the_merged_df.to_csv("/Users/grice/mywork/boatrace/data/motor_and_boat/test<.csv")
-    # print(the_merged_df.columns)
+    the_merged_df = make_merged_df()
+    the_merged_df.to_csv("/Users/grice/mywork/boatrace/data/motor_and_boat/test<.csv")
+    print(the_merged_df.columns)

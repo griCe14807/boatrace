@@ -45,6 +45,7 @@ def make_df_for_analyze(merged_df, fv_list, column_list_label, odds_list):
     # ラベルをbooleanに変換
     fv_label_df = analyzer_conf.make_label_boolean_ver1(fv_label_df, column_list_label)
     print("解析用dfの行数は.{0}".format(len(fv_label_df)))
+    print(fv_label_df.dtypes)
 
     """
     # 特徴量を標準化

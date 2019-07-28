@@ -48,11 +48,15 @@ def cron_generater():
 
 if __name__ == "__main__":
 
-    # input
-    the_hd = "2019/07/07"
 
-    # race noは1固定でOK
-    the_rno = "1R"
+    # ------- input -----------
+
+    the_hd = "2019/07/27"
+    # 指定したrnoより後の物をprint
+    the_rno_int = 1
+    # --------------------------- #
+
+    the_rno = str(the_rno_int) + "R"
     # 会場のリスト
     the_jcd_dict = boatrace_crawler_conf.make_jcd_dict()
     the_jcd_list = list(the_jcd_dict.keys())
@@ -75,24 +79,26 @@ if __name__ == "__main__":
 
     # dfをまとめて一つにする
     the_closing_time_df = pd.concat(the_closing_time_df_list)
-    print(the_closing_time_df)
+    # print(the_closing_time_df)
 
     # dfからcrontabのスクリプトをgenerate
     for index, rows in the_closing_time_df.iterrows():
         closing_time_min = int(rows["締め切り時刻"][3:5])
         closing_time_hour = int(rows["締め切り時刻"][0:2])
         # 11じ1分など、3分前だと時間まで変わるやつらの対応
-        if closing_time_min < 10:
-            conduction_time_min = str(60 + closing_time_min - 10)
+        if closing_time_min < 5:
+            conduction_time_min = str(60 + closing_time_min - 5)
             conduction_time_hour = str(closing_time_hour - 1)
         else:
-            conduction_time_min = str(closing_time_min - 10)
+            conduction_time_min = str(closing_time_min - 5)
             conduction_time_hour = str(closing_time_hour)
         conduction_time = conduction_time_min + " " + conduction_time_hour + " * * * "
         command = "cd /Users/grice/mywork/boatrace/src/automated_voting/; bash -l -c " +\
                   "'python3 /Users/grice/mywork/boatrace/src/automated_voting/automated_voter.py -rno " +\
                   rows["レースナンバー"] + " -jcd " + rows["会場"] + " -hd " + rows["日付"] + "';"
         cron = conduction_time + command
-        print(cron)
+
+        if int(rows["レースナンバー"][:-1]) >= the_rno_int:
+            print(cron)
 
     # crontabスクリプトを書きだし
