@@ -8,8 +8,8 @@ old/
 supplement/
 
 # automated_voting
-automated_voting/automated_voter.py
-automated_voting/crontab_generater.py
+src/automated_voting/automated_voter.py
+src/automated_voting/crontab_generater.py
 
 
 # Data
