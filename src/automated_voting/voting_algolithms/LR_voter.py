@@ -52,7 +52,7 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3):
         clf_list = pickle.load(open(output_file, 'rb'))
 
         # exhibition timeをcrawlして取得
-        the_exhibition_time_list = exhibition_crawler.main(jcd, DRIVER_WIN, DRIVER_MAC, INTERVAL)
+        the_exhibition_time_list = exhibition_crawler.main(jcd, INTERVAL)
 
 
         # racer listをcrawlして取得
@@ -124,9 +124,9 @@ if __name__ == "__main__":
     
     """
     # ----------input------------
-    the_rno = "9R"
-    the_jcd = "福　岡"
-    the_hd = "2019/07/27"
+    the_rno = "12R"
+    the_jcd = "大　村"
+    the_hd = "2019/07/28"
 
     threshold_1 = 0.7
     threshold_2 = 0.6

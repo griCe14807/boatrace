@@ -1,13 +1,14 @@
 # -*- coding=utf8 =*-
-import os
-import os.path
 import time
+import sys
+import os
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(current_dir, '../conf/'))
 
 # my module
 import boatrace_crawler_conf
+import selenium_conf
 
 
 def get_start_time():
@@ -44,18 +45,14 @@ def get_exhibition_time(driver, INTERVAL):
     return exhibition_time_list
 
 
-def main(input_jcd, DRIVER_WIN, DRIVER_MAC, INTERVAL):
+def main(input_jcd, INTERVAL):
 
     # crawle先のurlを作成
     jcd_number = boatrace_crawler_conf.make_jcd_dict()[input_jcd]
     target_url = "http://livebb.jlc.ne.jp/bb_top/new_bb/index.php?tpl={0}".format(jcd_number)
 
-    # ブラウザ起動
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    driver_path = DRIVER_WIN if os.name == "nt" else DRIVER_MAC
-    driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
+    # driver
+    driver = selenium_conf.load_driver()
     time.sleep(INTERVAL)
 
     # 対象サイトへアクセス
@@ -81,12 +78,9 @@ if __name__ == "__main__":
 
     input_jcd = "若　松"
 
-    DRIVER_WIN = "chromedriver.exe"
-    DRIVER_MAC = '/Users/grice/Desktop/Selenium/chromedriver'
-
     # 各動作間の待ち時間（秒）
     INTERVAL = 3
 
     # ------------------------------- #
 
-    the_exhibition_time_list = main(input_jcd, DRIVER_WIN, DRIVER_MAC, INTERVAL)
+    the_exhibition_time_list = main(input_jcd, INTERVAL)
