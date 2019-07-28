@@ -10,7 +10,7 @@ def load_driver():
 
     # driverへのパス
     DRIVER_WIN = "chromedriver.exe"
-    DRIVER_MAC = '/Users/grice/Desktop/Selenium/chromedriver'
+    DRIVER_MAC = '/usr/local/bin/chromedriver'
 
     # ブラウザ起動
     options = Options()
