@@ -14,6 +14,8 @@ def load_driver():
 
     # ブラウザ起動
     options = Options()
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--start-maximized")
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     driver_path = DRIVER_WIN if os.name == "nt" else DRIVER_MAC

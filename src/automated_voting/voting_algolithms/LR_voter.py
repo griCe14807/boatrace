@@ -125,7 +125,7 @@ if __name__ == "__main__":
     """
     # ----------input------------
     the_rno = "12R"
-    the_jcd = "大　村"
+    the_jcd = "丸　亀"
     the_hd = "2019/07/28"
 
     threshold_1 = 0.7

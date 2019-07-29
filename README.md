@@ -1,31 +1,48 @@
-競艇のデータ解析をするためのプロジェクト
+# boatrace
+競艇予想を行うプロジェクト
 
-## How to use
-### Demo
-
-レポジトリのクローン
-
-`git clone https://github.com/griCe14807/boatrace.git`
-
-実行ファイルのあるフォルダへ移動
-
-`$ cd ./boatrace/src/automated_voting/voting_algolithms`
-
-過去のレースデータを用いた学習。学習済みのclfは`"/Users/grice/mywork/boatrace/data/analysis/LR_dump"`
+## Demo
+#### 過去のレースデータを用いた学習
+学習済みのclfは`"/Users/grice/mywork/boatrace/data/analysis/LR_dump"`
 に保存される。
 
 ```
-$ python3 LR_analyzer.py
+$ python3 src/automated_voting/voting_algolithms/LR_analyzer.py
 ```
 
-学習結果を用いて指定したレース結果を予測。アウトプットは、
+#### 学習結果を用いて指定したレース結果を予測
+アウトプットは、
 - 1号艇の1着率
 - 2-6号艇が3着以内に入る確率
 - 推奨bet list (3連単)
 
 下の例では、2019年7月21日に戸田競艇場で行われる第11レースを予想。
 ```
-$ python3 LR_voter.py -rno 11R -jcd 戸　田 -hd 2019/07/21
+$ python3 src/automated_voting/voting_algolithms/LR_voter.py -rno 11R -jcd 戸　田 -hd 2019/07/21
+```
+
+## Requirement
+#### レポジトリのクローン
+
+`git clone https://github.com/griCe14807/boatrace.git`
+
+#### 必要なモジュールをインストール
+```
+pip3 install selenium
+TODO 追記
+```
+#### ChromeDriverのインストール
+インストールしたGoogle Chromeに対応するversionを取得（下のコードでは2.34）。
+
+Google Chromeのバージョンは`google-chrome-stable -version`で確認できる。
+
+※ Google Chromeのバージョンと対応するChromeDriverのバージョンの確認は以下
+(https://sites.google.com/a/chromium.org/chromedriver/downloads)
+
+```
+wget https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip
+unzip chromedriver_linux64.zip
+mv chromedriver /usr/local/bin/
 ```
 
 ### データ準備
@@ -63,7 +80,4 @@ $ python3 LR_voter.py -rno 11R -jcd 戸　田 -hd 2019/07/21
  -   `logistic_regression_2.ipynb`: 基本logistic_regression_1と同じだが、特徴量を増やした。`LR_analyzer`, `LR_voter`はこのアルゴリズムを用いている。
 
 ### 自動ベット
-解析した結果を元に、実用化できそうなアルゴリズムは
-自分のID, passwardをスクリプトに直うちしているため共有なしで笑
-
-必要とあらば書き直して共有します．
+自分のID, passwardをスクリプトに直うちしているため共有なし
