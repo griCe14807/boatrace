@@ -10,11 +10,9 @@ sys.path.append(os.path.join(current_dir, '../../data_preparing/'))
 sys.path.append(os.path.join(current_dir, '../../analyze/'))
 
 # my module
-import boatrace_crawler_conf
-import race_list_crawler
 import loader
 import exhibition_crawler
-import motor_and_boat_data_crawler
+import race_list_crawler
 
 # 定数定義
 DRIVER_WIN = "chromedriver.exe"
@@ -48,45 +46,41 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3):
         return voting_number_list
     else:
         # clf_list (各ラベルについて学習ずみのclfを要素とするリスト) をロード
-        output_file = "/Users/grice/mywork/boatrace/data/analysis/LR_dump"
+        output_file = os.path.join(current_dir, '../../../data/analysis/LR_dump')
         clf_list = pickle.load(open(output_file, 'rb'))
 
         # exhibition timeをcrawlして取得
         the_exhibition_time_list = exhibition_crawler.main(jcd, INTERVAL)
 
-
-        # racer listをcrawlして取得
-        the_race_url = boatrace_crawler_conf.make_url("racelist", rno, jcd, hd)
-        the_soup = boatrace_crawler_conf.html_parser(the_race_url)
-        racer_list = race_list_crawler.crawle_race_list(the_soup)
-        # 今回使うモーターのデータを取得
-        the_motor_and_boat_df = motor_and_boat_data_crawler.crawl_motor_data(the_soup, rno, jcd, hd)
-
-
+        # race_listから取れるデータを取得
+        the_motor_and_boat_df = race_list_crawler.main(rno, jcd, hd)
         # racer dfをload
         racer_df = loader.load_racer_data()
 
         # 解析用dfへ変換する元のjsonを作成
         for_analysis_dict = {}
-        for i, racer in enumerate(racer_list, 1):
-            racer_row = racer_df[racer_df["racerName_ch"] == racer]
+        for i in range(1, 7):
+            racer_row = pd.merge(the_motor_and_boat_df, racer_df, how="left",
+                                 left_on=["racer_{0}".format(i), "racer_id_{0}".format(i)],
+                                 right_on=["racerName_ch", "racerId"]
+                                 )
             for_analysis_dict["class_{0}".format(i)] = [racer_row["class"].values[0]]
             for_analysis_dict["aveST_frame{0}".format(i)] = [racer_row["aveST_frame{0}".format(i)].values[0]]
             for_analysis_dict["placeRate_frame{0}".format(i)] = [racer_row["placeRate_frame{0}".format(i)].values[0]]
             for_analysis_dict["exhibitionTime_{0}".format(i)] = [the_exhibition_time_list[i - 1]]
             for_analysis_dict["motor_place2Ratio_{0}".format(i)] = float(the_motor_and_boat_df["motor_place2Ratio_{0}".format(i)][0][1:])
             for_analysis_dict["motor_place3Ratio_{0}".format(i)] = float(the_motor_and_boat_df["motor_place3Ratio_{0}".format(i)][0][1:])
+            for_analysis_dict["boat_place2Ratio_{0}".format(i)] = float(the_motor_and_boat_df["boat_place2Ratio_{0}".format(i)][0][1:])
+            for_analysis_dict["boat_place3Ratio_{0}".format(i)] = float(the_motor_and_boat_df["boat_place3Ratio_{0}".format(i)][0][1:])
 
         # dfに格納
         for_analysis_df = pd.DataFrame(for_analysis_dict)
 
         # クラスカラムを，A1 =0, A2 = 1のように数字に変換する
         for_analysis_df = convert_class_into_int(for_analysis_df)
-        print(for_analysis_df.dtypes)
 
         # inputに用いることができるarrayに直す
         x = for_analysis_df.values
-        print(x)
 
         # ラベルが1になる確率を1号艇から6号艇の順に並べたリスト
         predict_proba_all = []
@@ -125,10 +119,10 @@ if __name__ == "__main__":
     """
     # ----------input------------
     the_rno = "12R"
-    the_jcd = "丸　亀"
-    the_hd = "2019/07/28"
+    the_jcd = "桐　生"
+    the_hd = "2019/08/15"
 
-    threshold_1 = 0.7
+    threshold_1 = 0.75
     threshold_2 = 0.6
     threshold_3 = 0.4
 

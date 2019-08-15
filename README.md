@@ -1,25 +1,6 @@
 # boatrace
 競艇予想を行うプロジェクト
 
-## Demo
-#### 過去のレースデータを用いた学習
-学習済みのclfは`"/Users/grice/mywork/boatrace/data/analysis/LR_dump"`
-に保存される。
-
-```
-$ python3 src/automated_voting/voting_algolithms/LR_analyzer.py
-```
-
-#### 学習結果を用いて指定したレース結果を予測
-アウトプットは、
-- 1号艇の1着率
-- 2-6号艇が3着以内に入る確率
-- 推奨bet list (3連単)
-
-下の例では、2019年7月21日に戸田競艇場で行われる第11レースを予想。
-```
-$ python3 src/automated_voting/voting_algolithms/LR_voter.py -rno 11R -jcd 戸　田 -hd 2019/07/21
-```
 
 ## Requirement
 #### レポジトリのクローン
@@ -29,15 +10,17 @@ $ python3 src/automated_voting/voting_algolithms/LR_voter.py -rno 11R -jcd 戸�
 #### 必要なモジュールをインストール
 ```
 pip3 install selenium
-TODO 追記
+pip3 install pandas
 ```
 #### ChromeDriverのインストール
-インストールしたGoogle Chromeに対応するversionを取得（下のコードでは2.34）。
+Google Chronme のバージョンに対応したChromeDriverをインストール
 
-Google Chromeのバージョンは`google-chrome-stable -version`で確認できる。
+- Google Chromeのバージョンは`google-chrome-stable -version`で確認
 
-※ Google Chromeのバージョンと対応するChromeDriverのバージョンの確認は以下
+- Google Chromeのバージョンと対応するChromeDriverのバージョンの確認は下記url
 (https://sites.google.com/a/chromium.org/chromedriver/downloads)
+
+インストールしたGoogle Chromeに対応するversionをダウンロード（下のコード例では2.34）し、`/usr/local/bin/`へ移動
 
 ```
 wget https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip
@@ -45,8 +28,29 @@ unzip chromedriver_linux64.zip
 mv chromedriver /usr/local/bin/
 ```
 
+## Demo
+#### 過去のレースデータを用いた学習
+```
+$ python3 src/automated_voting/voting_algolithms/LR_analyzer.py
+```
+学習済みのclfは`"/Users/grice/mywork/boatrace/data/analysis/LR_dump"`
+に保存される。
+
+
+#### 学習結果を用いて指定したレース結果を予測
+下の例では、2019年7月21日に戸田競艇場で行われる第11レースを予想。
+クロールを行う関係上、展示タイムが表示されて以降（投票締め切りの10分前以降程度）に実行する必要あり
+```
+$ python3 src/automated_voting/voting_algolithms/LR_voter.py -rno 11R -jcd 戸　田 -hd 2019/07/21
+```
+アウトプットは、
+- 1号艇の1着率
+- 2-6号艇が3着以内に入る確率
+- 推奨bet list (3連単)
+
+## 使い方　応用編
 ### データ準備
-※ `git clone` した場合，19年1月1日から7月までのデータがダウンロード済み。
+※ `git clone` した場合，19年1月1日〜8月10日のデータがダウンロード済み。
 
 ※ロードしたデータフレームのカラム名とデータの対応は`\column_descriptions.xlsx`にまとめる.
 
@@ -64,10 +68,13 @@ mv chromedriver /usr/local/bin/
     - 保存先: `./boatrace/data/motor_and_boat`
 
 ### データロード
-`race_results_loader`を実行し、レース結果をdfにロード
-※ `race_results_loader` には，レース結果のみをロードする`load_race_results`, 
-レーサー情報のみをロードする`load_racer_data`もありますが，
-実際に使うのはほぼ`make_merged_df`のみ．
+レース日・開催場所・レース番号をindexとし、レース結果や諸々の統計量をカラムにしたpandas dfを作成し、変数に格納
+
+```
+(in python)
+import loader
+df = race_results_loader
+```
 
 ### 解析
 準備したデータをロードし、解析を行う。

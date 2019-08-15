@@ -117,6 +117,10 @@ if __name__ == "__main__":
         fv_list.append("motor_place2Ratio_{0}".format(i))
         fv_list.append("motor_place3Ratio_{0}".format(i))
 
+        # 各ボートの2連率, 3連率
+        fv_list.append("boat_place2Ratio_{0}".format(i))
+        fv_list.append("boat_place3Ratio_{0}".format(i))
+
     # 解析に使うラベルカラム: 今回は一枠が一着になるかどうか？を予測
     column_list_label = ["rank_{0}".format(i) for i in range(1, 7)]
 
@@ -140,7 +144,7 @@ if __name__ == "__main__":
     # main
 
     # 過去のレース結果をdfとして取得
-    the_merged_df = loader.make_merged_df()
+    the_merged_df = loader.main()
     # dfをソート
     the_merged_df = the_merged_df.sort_values(["date", "venue", "raceNumber"])
     # print(the_merged_df["exhibitionTime_1"])

@@ -360,7 +360,7 @@ def load_race_results_supplementary_data():
     return race_results_supplementary_df
 
 
-def make_merged_df():
+def main():
     merged_df = load_race_results()
     racer_df = load_racer_data()
     race_results_supplementary_df = load_race_results_supplementary_data()
@@ -386,8 +386,12 @@ def make_merged_df():
     # race_result supplementaryの一部をマージ
     column_list_element1 = ["motor_place2Ratio_{0}".format(i) for i in range(1, 7)]
     column_list_element2 = ["motor_place3Ratio_{0}".format(i) for i in range(1, 7)]
-    column_list_element3 = ["raceNumber", "venue", "date"]
-    column_list = column_list_element1 + column_list_element2+ column_list_element3
+    column_list_element3 = ["boat_place2Ratio_{0}".format(i) for i in range(1, 7)]
+    column_list_element4 = ["boat_place3Ratio_{0}".format(i) for i in range(1, 7)]
+    column_list_element5 = ["raceNumber", "venue", "date"]
+    column_list = column_list_element1 + column_list_element2+ \
+                  column_list_element3 + column_list_element4 + \
+                  column_list_element5
 
     merged_df = pd.merge(merged_df,
                          race_results_supplementary_df[column_list],
@@ -418,6 +422,6 @@ if __name__ == "__main__":
     # the_race_results_supplementary_df = load_race_results_supplementary_data()
     # print(the_race_results_supplementary_df)
 
-    the_merged_df = make_merged_df()
-    the_merged_df.to_csv("/Users/grice/mywork/boatrace/data/motor_and_boat/test<.csv")
-    print(the_merged_df.columns)
+    the_merged_df = main()
+    # the_merged_df.to_csv("/Users/grice/mywork/boatrace/data/motor_and_boat/test<.csv")
+    print(the_merged_df["boat_place3Ratio_1"])
