@@ -4,22 +4,38 @@ import itertools
 import time
 import sys
 import os
-current_dir = os.getcwd()
+import argparse
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, '../crawl/'))
 
 # my module
 import race_list_crawler
 import boatrace_crawler_conf
 
+
+def argparser():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--start_date",
+                        help=u"'20190102'のように6桁の数字で指定",
+                        required=True
+                        )
+    parser.add_argument("-e", "--end_date",
+                        help=u"'20190102'のように6桁の数字で指定. 指定した日付の前日までがクロール対象",
+                        required=True
+                        )
+    args = parser.parse_args()
+
+    return args
+
+
 if __name__ == "__main__":
 
-    #################### inputs ########################
-
     # crawl開始日付、終了日付の指定
-    the_date_from = '20190102'
-    the_date_to = '20190103'
-
-    ####################################################
+    the_args = argparser()
+    the_date_from = the_args.start_date
+    the_date_to = the_args.end_date
 
     # 以下で定義する全てのリストの要素の組み合わせについてcrawlを行う.
     # race noのリスト
@@ -45,7 +61,6 @@ if __name__ == "__main__":
         the_race_result_df = pd.concat(this_race_result_df_list)
 
         # output csvファイルの指定
-        current_dir = os.path.dirname(os.path.abspath(__file__))
         output_path = os.path.join(current_dir, '../../data/motor_and_boat')
         the_output_filename = os.path.join(output_path, the_hd[2:4] + the_hd[5:7] + the_hd[8:10] + ".csv")
         print(the_output_filename)
