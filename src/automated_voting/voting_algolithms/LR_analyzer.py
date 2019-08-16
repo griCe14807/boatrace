@@ -159,7 +159,7 @@ if __name__ == "__main__":
     clf_list = learn_logistic_regression(train_data, column_list_label)
 
     # 学習結果をファイルに出力
-    output_file = "/Users/grice/mywork/boatrace/data/analysis/LR_dump"
+    output_file = os.path.join(current_dir, 'LR_dump')
     pickle.dump(clf_list, open(output_file, 'wb'))
 
     # 以下データの正しさ確認用に最適化された結果の切片と重みを取得

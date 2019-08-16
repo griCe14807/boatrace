@@ -46,7 +46,7 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3):
         return voting_number_list
     else:
         # clf_list (各ラベルについて学習ずみのclfを要素とするリスト) をロード
-        output_file = os.path.join(current_dir, '../../../data/analysis/LR_dump')
+        output_file = os.path.join(current_dir, 'LR_dump')
         clf_list = pickle.load(open(output_file, 'rb'))
 
         # exhibition timeをcrawlして取得
@@ -118,9 +118,9 @@ if __name__ == "__main__":
     
     """
     # ----------input------------
-    the_rno = "12R"
-    the_jcd = "桐　生"
-    the_hd = "2019/08/15"
+    the_rno = "10R"
+    the_jcd = "びわこ"
+    the_hd = "2019/08/16"
 
     threshold_1 = 0.75
     threshold_2 = 0.6
