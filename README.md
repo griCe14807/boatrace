@@ -11,6 +11,7 @@
 ```
 pip3 install selenium
 pip3 install pandas
+pip3 install scikit-learn
 ```
 #### ChromeDriverのインストール
 Google Chronme のバージョンに対応したChromeDriverをインストール
@@ -50,22 +51,35 @@ $ python3 src/automated_voting/voting_algolithms/LR_voter.py -rno 11R -jcd 戸�
 
 ## 使い方　応用編
 ### データ準備
-※ `git clone` した場合，19年1月1日〜8月10日のデータがダウンロード済み。
-
 ※ロードしたデータフレームのカラム名とデータの対応は`\column_descriptions.xlsx`にまとめる.
 
 ##### レース結果
-1. `downloader_race_results.py`
-を実行し、レース結果をダウンロード. 
-    - ダウンロード元: `http://www1.mbrace.or.jp/od2/K/dindex.html`
-    - ダウンロード先: `data/results_race/lzh`
-2. ダウンロードしたデータを手動で解凍し、`./boatrace/data/results_race`フォルダへ移動
+###### レース結果をダウンロード
+```
+$ src/data_preparing/downloader_race_results.py
+```
+- ダウンロード元: `http://www1.mbrace.or.jp/od2/K/dindex.html`
+- ダウンロード先: `data/results_race/lzh`
+
+※ `git clone` した場合，19年1月1日〜8月17日のデータがダウンロード済み。
+
+###### ダウンロードしたデータを手動で解凍
+###### `./boatrace/data/results_race`フォルダへ移動
 ##### 選手情報
-1. `https://www.boatrace.jp/owpc/pc/extra/data/download.html`からレーサー期別成績をダウンロード（手動）し，`data\racer`へ格納
+`https://www.boatrace.jp/owpc/pc/extra/data/download.html`からレーサー期別成績をダウンロード（手動）し，`data\racer`へ格納
+- 年に二回、4月〜10月分と11月から3月分のデータがまとめてアップロードされるため、そのたびに追加。
+
+※ `git clone` した場合，19年4月までのデータがダウンロード済み。
+
 ##### モーター・ボートおよび直近の成績
-1. `motor_data_csv_maker`を実行し、データをcrawl
-    - crawl元: 公式HP出走表 (例：'https://boatrace.jp/owpc/pc/race/racelist?rno=6&jcd=01&hd=20190816')
-    - 保存先: `data/motor_and_boat`
+1. `motor_data_csv_maker`を実行. 下の例では8/15から8/17までcrawlし、csv形式で保存する
+```bash
+$ python3 src/data_preparing/race_result_supplement_csv_maker.py -s 20190815 -e 20190818
+```
+- crawl元: 公式HP出走表 (例：'https://boatrace.jp/owpc/pc/race/racelist?rno=6&jcd=01&hd=20190816')
+- 保存先: `data/motor_and_boat`
+
+※ `git clone` した場合，19年1月1日〜8月15日のデータがダウンロード済み。
 
 ### データロード
 レース日・開催場所・レース番号をindexとし、レース結果や諸々の統計量をカラムにしたpandas dfを作成し、変数に格納

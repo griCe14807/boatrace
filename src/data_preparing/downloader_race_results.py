@@ -11,6 +11,11 @@ import os
 import time
 # import patoolib
 
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+
 class RaceResults:
     def __init__(self):
         self.baseuri = "http://www1.mbrace.or.jp/od2/K/%s/k%s.lzh" # http://www1.mbrace.or.jp/od2/K/201612/k161201.lzh
@@ -24,7 +29,7 @@ class RaceResults:
             dirname = date.strftime("%Y%m")
             lzhname = date.strftime("%y%m%d")
             uri = self.baseuri % (dirname, lzhname)
-            savename = "/Users/grice/mywork/boatrace/data/results_race/lzh/%s.lzh" % lzhname
+            savename = os.path.join(current_dir, "../../data/results_race/lzh/%s.lzh") % lzhname
             if not os.path.exists(savename):
                 print("Send request to", uri)
                 urllib.request.urlretrieve(uri, savename)
@@ -39,5 +44,5 @@ class RaceResults:
 
 if __name__ == "__main__":
     r = RaceResults()
-    r.download("2019-07-03", "2019-08-10")
+    r.download("2019-08-11", "2019-08-17")
 
