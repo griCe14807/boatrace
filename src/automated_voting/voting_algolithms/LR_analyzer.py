@@ -1,11 +1,11 @@
 # -*- coding=utf8 =*-
 # 必要なモジュールのインポート
-
-from sklearn.linear_model import LogisticRegression
-import pickle
-
 import sys
 import os
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+import pickle
+import csv
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, '../../data_preparing/'))
@@ -25,33 +25,48 @@ def make_df_for_analyze(merged_df, fv_list, column_list_label, odds_list):
         column_list_label: dfのうち、labelとして用いるカラム名のリスト
     """
 
-    # 解析用dfを作成
-    fv_label_odds_df = merged_df[fv_list + column_list_label + odds_list]
-
-    # nanを含む行を削除
-    fv_label_odds_df = fv_label_odds_df.dropna()
-
-    # oddsはないバージョンのdf
-    fv_label_df = fv_label_odds_df[fv_list + column_list_label]
+    # 特徴量のdfを作成
+    fv_df = merged_df[fv_list]
 
     # クラスカラムを，A1 =0, A2 = 1のように数字に変換する
     class_dict = {"A1": 0, "A2": 1, "B1": 2, "B2": 3}
     for key, value in class_dict.items():
-        fv_label_df.replace(key, value, inplace=True)
+        fv_df.replace(key, value, inplace=True)
 
-    # なぜかdtypeがstrになっちゃうのでintに戻す
-    fv_label_df = fv_label_df.astype(float)
+    # なぜかdtypeがstrになっちゃうのでfloatに戻す
+    fv_df = fv_df.astype(float)
+
+    # labelのdfを作成
+    label_df = merged_df[column_list_label]
 
     # ラベルをbooleanに変換
-    fv_label_df = analyzer_conf.make_label_boolean_ver1(fv_label_df, column_list_label)
-    print("解析用dfの行数は.{0}".format(len(fv_label_df)))
-    print(fv_label_df.dtypes)
+    label_df = analyzer_conf.make_label_boolean_ver1(label_df, column_list_label)
 
     """
     # 特徴量を標準化
     fv_label_df = analyzer_conf.standerdize_feature_values(
         fv_label_df, column_list_label)
     """
+
+    # オッズのdfを作成
+    odds_df = merged_df[odds_list]
+
+    # 解析用dfを作成
+    fv_label_odds_df = pd.concat([fv_df, label_df, odds_df], axis=1)
+    # nanを含む行を削除
+    fv_label_odds_df = fv_label_odds_df.dropna()
+
+    # oddsはないバージョンのdf
+    fv_label_df = pd.concat([fv_df, label_df], axis=1)
+    # nanを含む行を削除
+    fv_label_df = fv_label_df.dropna()
+
+    """
+    print(len(fv_df), len(label_df), len(odds_df))
+    print("解析用dfの行数は.{0}".format(len(fv_label_df)))
+    print(fv_label_df)
+    """
+
     return fv_label_df, fv_label_odds_df
 
 
@@ -104,20 +119,31 @@ if __name__ == "__main__":
     # ----------input-------------
     # 解析に使う特徴量カラム
     fv_list = []
+
     for i in range(1, 7):
         # 各枠のレーサーのクラス
         fv_list.append("class_{0}".format(i))
         # 各枠の平均ST
         fv_list.append("aveST_frame{0}".format(i))
-        # 連帯率
-        fv_list.append("placeRate_frame{0}".format(i))
+
+        # 勝率・二連率・三連率（全国）
+        fv_list.append("win_rate_national_{0}".format(i))
+        fv_list.append("place2Ratio_national_{0}".format(i))
+        fv_list.append("place3Ratio_national_{0}".format(i))
+
+        # 勝率・二連率・三連率（当地）
+        fv_list.append("win_rate_local_{0}".format(i))
+        fv_list.append("place2Ratio_local_{0}".format(i))
+        fv_list.append("place3Ratio_local_{0}".format(i))
+
         # 展示タイム
         fv_list.append("exhibitionTime_{0}".format(i))
+
         # 各モーターの2連率, 3連率
         fv_list.append("motor_place2Ratio_{0}".format(i))
         fv_list.append("motor_place3Ratio_{0}".format(i))
 
-        # 各ボートの2連率, 3連率
+        # ボートの2連率、3連率
         fv_list.append("boat_place2Ratio_{0}".format(i))
         fv_list.append("boat_place3Ratio_{0}".format(i))
 
@@ -151,6 +177,11 @@ if __name__ == "__main__":
 
     # 学習に使う特徴量、ラベルを用意
     fv_label_df, fv_label_odds_df = make_df_for_analyze(the_merged_df, fv_list, column_list_label, odds_list)
+    # labelのカラムをcsvとして書き出しておく（voterに使う）
+    with open(os.path.join(current_dir, 'colum_list.csv'), "w", encoding="Shift_jis") as f:
+        writer = csv.writer(f, lineterminator="\n")  # writerオブジェクトの作成 改行記号で行を区切る
+        print(fv_label_df.columns)
+        writer.writerows(fv_label_df.columns)
 
     # 学習データおよびテストデータを用意
     train_data, test_data, train_size = separate_train_test_dataset(fv_label_df, train_data_ratio)
@@ -163,9 +194,11 @@ if __name__ == "__main__":
     pickle.dump(clf_list, open(output_file, 'wb'))
 
     # 以下データの正しさ確認用に最適化された結果の切片と重みを取得
+    """
     for i, clf in enumerate(clf_list):
         intercept = clf.intercept_
         coef = clf.coef_
         print("切片は{0}".format(intercept))
         for j in range(coef.shape[1]):
             print(fv_list[j], coef[0, j], "\n")
+    """

@@ -66,18 +66,30 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3):
                                  )
             for_analysis_dict["class_{0}".format(i)] = [racer_row["class"].values[0]]
             for_analysis_dict["aveST_frame{0}".format(i)] = [racer_row["aveST_frame{0}".format(i)].values[0]]
-            for_analysis_dict["placeRate_frame{0}".format(i)] = [racer_row["placeRate_frame{0}".format(i)].values[0]]
+            # 全国勝率・二連・三連率
+            for_analysis_dict["win_rate_national_{0}".format(i)] = the_motor_and_boat_df["win_rate_national_{0}".format(i)]
+            for_analysis_dict["place2Ratio_national_{0}".format(i)] = the_motor_and_boat_df["place2Ratio_national_{0}".format(i)]
+            for_analysis_dict["place3Ratio_national_{0}".format(i)] = the_motor_and_boat_df["place3Ratio_national_{0}".format(i)]
+            # 勝率・二連率・三連率（当地）
+            for_analysis_dict["win_rate_local_{0}".format(i)] = the_motor_and_boat_df["win_rate_local_{0}".format(i)]
+            for_analysis_dict["place2Ratio_local_{0}".format(i)] = the_motor_and_boat_df["place2Ratio_local_{0}".format(i)]
+            for_analysis_dict["place3Ratio_local_{0}".format(i)] = the_motor_and_boat_df["place3Ratio_local_{0}".format(i)]
+            # 展示タイム
             for_analysis_dict["exhibitionTime_{0}".format(i)] = [the_exhibition_time_list[i - 1]]
             for_analysis_dict["motor_place2Ratio_{0}".format(i)] = float(the_motor_and_boat_df["motor_place2Ratio_{0}".format(i)][0][1:])
             for_analysis_dict["motor_place3Ratio_{0}".format(i)] = float(the_motor_and_boat_df["motor_place3Ratio_{0}".format(i)][0][1:])
             for_analysis_dict["boat_place2Ratio_{0}".format(i)] = float(the_motor_and_boat_df["boat_place2Ratio_{0}".format(i)][0][1:])
             for_analysis_dict["boat_place3Ratio_{0}".format(i)] = float(the_motor_and_boat_df["boat_place3Ratio_{0}".format(i)][0][1:])
 
+
         # dfに格納
         for_analysis_df = pd.DataFrame(for_analysis_dict)
 
         # クラスカラムを，A1 =0, A2 = 1のように数字に変換する
         for_analysis_df = convert_class_into_int(for_analysis_df)
+
+        # dfをfloatに変換
+        for_analysis_df = for_analysis_df.astype(float)
 
         # inputに用いることができるarrayに直す
         x = for_analysis_df.values
@@ -118,9 +130,9 @@ if __name__ == "__main__":
     
     """
     # ----------input------------
-    the_rno = "10R"
-    the_jcd = "びわこ"
-    the_hd = "2019/08/16"
+    the_rno = "1R"
+    the_jcd = "児　島"
+    the_hd = "2019/09/01"
 
     threshold_1 = 0.75
     threshold_2 = 0.6

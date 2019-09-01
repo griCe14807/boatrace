@@ -364,6 +364,21 @@ def main():
     merged_df = load_race_results()
     racer_df = load_racer_data()
     race_results_supplementary_df = load_race_results_supplementary_data()
+    for i in range(1, 7):
+        for j in range(1, 12):
+            # 最近のレース結果は欠損値が多く生じるので0で埋める
+            race_results_supplementary_df[["CS_frame_{0}_{1}".format(i, j),
+                                           "CS_rank_{0}_{1}".format(i, j)]] = \
+                race_results_supplementary_df[["CS_frame_{0}_{1}".format(i, j),
+                                               "CS_rank_{0}_{1}".format(i, j)]].fillna(0)
+
+            # 最近のレース結果の順位に文字列が書いてあることがある（転覆とか落水とかの時）
+            race_results_supplementary_df[["CS_frame_{0}_{1}".format(i, j),
+                                           "CS_rank_{0}_{1}".format(i, j)]] = \
+                race_results_supplementary_df[["CS_frame_{0}_{1}".format(i, j),
+                                               "CS_rank_{0}_{1}".format(i, j)]].replace(
+                    ['転', 'エ', '落', 'Ｆ', 'Ｌ', '妨', '沈', '不', '欠', '＿', '失'], 0)
+
 
     # racer_dfのデータの一部をマージ
     for i in range(1, 7):
@@ -384,20 +399,46 @@ def main():
                              left_on="racerName_{0}".format(i), right_on="racerName_ch")
 
     # race_result supplementaryの一部をマージ
+
+    # レースナンバー、開催地、開催日
+    column_list_index = ["raceNumber", "venue", "date"]
+    # モーターの二連率、3連率
     column_list_element1 = ["motor_place2Ratio_{0}".format(i) for i in range(1, 7)]
     column_list_element2 = ["motor_place3Ratio_{0}".format(i) for i in range(1, 7)]
+    # ボートの二連率、3連率
     column_list_element3 = ["boat_place2Ratio_{0}".format(i) for i in range(1, 7)]
     column_list_element4 = ["boat_place3Ratio_{0}".format(i) for i in range(1, 7)]
-    column_list_element5 = ["raceNumber", "venue", "date"]
+    # 今大会のこれまでの結果
+    column_list_element5 = ["CS_frame_{0}_{1}".format(i, j) for i in range(1, 7) for j in range(1, 12)]
+    column_list_element6 = ["CS_rank_{0}_{1}".format(i, j) for i in range(1, 7) for j in range(1, 12)]
+    # 全国、当地の勝率・二連率・三連率
+    column_list_element7 = ["win_rate_national_{0}".format(i) for i in range(1, 7)]
+    column_list_element8 = ["win_rate_local_{0}".format(i) for i in range(1, 7)]
+    column_list_element9 = ["ave_start_time_{0}".format(i) for i in range(1, 7)]
+    column_list_element10 = ["place2Ratio_national_{0}".format(i) for i in range(1, 7)]
+    column_list_element11 = ["place2Ratio_local_{0}".format(i) for i in range(1, 7)]
+    column_list_element12 = ["place3Ratio_national_{0}".format(i) for i in range(1, 7)]
+    column_list_element13 = ["place3Ratio_local_{0}".format(i) for i in range(1, 7)]
+
     column_list = column_list_element1 + column_list_element2+ \
                   column_list_element3 + column_list_element4 + \
-                  column_list_element5
+                  column_list_element5 + column_list_element6 + \
+                  column_list_element7 + column_list_element8 + \
+                  column_list_element9 + column_list_element10 + \
+                  column_list_element11 + column_list_element12 + \
+                  column_list_element13 + \
+                  column_list_index
+
 
     merged_df = pd.merge(merged_df,
                          race_results_supplementary_df[column_list],
                          how="left",
                          on=["date", "venue", "raceNumber"]
                              )
+    for i in range(1, 7):
+        for j in range(1, 12):
+            merged_df[["CS_frame_{0}_{1}".format(i, j),
+                       "CS_rank_{0}_{1}".format(i, j)]].astype(float)
 
     return merged_df
 
@@ -424,4 +465,4 @@ if __name__ == "__main__":
 
     the_merged_df = main()
     # the_merged_df.to_csv("/Users/grice/mywork/boatrace/data/motor_and_boat/test<.csv")
-    print(the_merged_df["boat_place3Ratio_1"])
+    print(the_merged_df["CS_frame_1_1"])

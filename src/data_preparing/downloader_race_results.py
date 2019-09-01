@@ -44,5 +44,5 @@ class RaceResults:
 
 if __name__ == "__main__":
     r = RaceResults()
-    r.download("2019-08-18", "2019-08-22")
+    r.download("2019-08-23", "2019-08-28")
 
