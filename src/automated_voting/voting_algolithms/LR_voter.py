@@ -39,8 +39,17 @@ def convert_class_into_int(input_df):
 
 
 def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3):
+
     voting_number_list = []
+
     exclude_jcd_list = ["蒲　郡", "平和島", "鳴　門", "下　関", "　津　"]
+
+    venue_list = ["　津　", "三　国", "下　関", "丸　亀", "住之江",
+                  "児　島", "唐　津", "多摩川", "大　村", "宮　島",
+                  "尼　崎", "常　滑", "平和島", "徳　山", "戸　田",
+                  "桐　生", "江戸川", "浜名湖", "琵琶湖", "福　岡",
+                  "芦　屋", "若　松", "蒲　郡", "鳴　門"]
+
 
     if jcd in exclude_jcd_list:
         return voting_number_list
@@ -81,6 +90,11 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3):
             for_analysis_dict["boat_place2Ratio_{0}".format(i)] = float(the_motor_and_boat_df["boat_place2Ratio_{0}".format(i)][0][1:])
             for_analysis_dict["boat_place3Ratio_{0}".format(i)] = float(the_motor_and_boat_df["boat_place3Ratio_{0}".format(i)][0][1:])
 
+        for venue in venue_list:
+            if venue == jcd:
+                for_analysis_dict["{0}".format(venue)] = 1
+            else:
+                for_analysis_dict["{0}".format(venue)] = 0
 
         # dfに格納
         for_analysis_df = pd.DataFrame(for_analysis_dict)
@@ -130,8 +144,8 @@ if __name__ == "__main__":
     
     """
     # ----------input------------
-    the_rno = "1R"
-    the_jcd = "児　島"
+    the_rno = "11R"
+    the_jcd = "常　滑"
     the_hd = "2019/09/01"
 
     threshold_1 = 0.75

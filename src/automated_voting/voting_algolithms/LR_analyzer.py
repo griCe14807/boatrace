@@ -33,6 +33,15 @@ def make_df_for_analyze(merged_df, fv_list, column_list_label, odds_list):
     for key, value in class_dict.items():
         fv_df.replace(key, value, inplace=True)
 
+    # 会場名をbooleanに変換
+    venue_df = pd.get_dummies(fv_df["venue"])
+
+    # fv_dfの方の会場の列を削除
+    fv_df = fv_df.drop("venue", axis=1)
+
+    # 会場名がbooleanになったfv_dfの作成
+    fv_df = pd.concat([fv_df, venue_df], axis=1)
+
     # なぜかdtypeがstrになっちゃうのでfloatに戻す
     fv_df = fv_df.astype(float)
 
@@ -116,9 +125,13 @@ def learn_logistic_regression(train_data, column_list_label):
 
 if __name__ == "__main__":
 
+
     # ----------input-------------
     # 解析に使う特徴量カラム
     fv_list = []
+
+    # 開催地
+    fv_list.append("venue")
 
     for i in range(1, 7):
         # 各枠のレーサーのクラス
@@ -146,6 +159,7 @@ if __name__ == "__main__":
         # ボートの2連率、3連率
         fv_list.append("boat_place2Ratio_{0}".format(i))
         fv_list.append("boat_place3Ratio_{0}".format(i))
+
 
     # 解析に使うラベルカラム: 今回は一枠が一着になるかどうか？を予測
     column_list_label = ["rank_{0}".format(i) for i in range(1, 7)]
@@ -181,7 +195,7 @@ if __name__ == "__main__":
     with open(os.path.join(current_dir, 'colum_list.csv'), "w", encoding="Shift_jis") as f:
         writer = csv.writer(f, lineterminator="\n")  # writerオブジェクトの作成 改行記号で行を区切る
         print(fv_label_df.columns)
-        writer.writerows(fv_label_df.columns)
+        writer.writerow(fv_label_df.columns)
 
     # 学習データおよびテストデータを用意
     train_data, test_data, train_size = separate_train_test_dataset(fv_label_df, train_data_ratio)
