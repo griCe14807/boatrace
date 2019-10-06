@@ -91,7 +91,11 @@ def voting_algolithm_2(predict_proba_all, threshold_1, threshold_2, threshold_3)
 
 
 
-def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3, algolithm):
+def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3, algolithm_key):
+
+    algolithm_dict = {"voting_algolithm_1": voting_algolithm_1,
+                      "voting_algolithm_2": voting_algolithm_2
+                      }
 
     venue_list = ["　津　", "三　国", "下　関", "丸　亀", "住之江",
                   "児　島", "唐　津", "多摩川", "大　村", "宮　島",
@@ -163,6 +167,7 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3, algolithm):
     print(predict_proba_all)
 
     # 投票するリストを作成 (1頭でx_2を超えたやつとx_3を超えたやつの組み合わせbox
+    algolithm = algolithm_dict[algolithm_key]
     voting_number_list = algolithm(predict_proba_all, threshold_1, threshold_2, threshold_3)
 
     return voting_number_list
@@ -188,8 +193,8 @@ if __name__ == "__main__":
     threshold_2 = 0.8
     threshold_3 = 0.5
 
-    algolithm = voting_algolithm_2
+    algolithm_key = "voting_algolithm_2"
 
     # ---------------------------
 
-    the_voting_number_list = main(the_rno, the_jcd, the_hd, threshold_1, threshold_2, threshold_3, algolithm)
+    the_voting_number_list = main(the_rno, the_jcd, the_hd, threshold_1, threshold_2, threshold_3, algolithm_key)
