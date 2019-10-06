@@ -109,7 +109,7 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3, algolithm_key):
     clf_list = pickle.load(open(output_file, 'rb'))
 
     # 直前情報をcrawlして取得
-    the_beforeinfo_df = exhibition_crawler.main(the_rno, the_jcd, the_hd)
+    the_beforeinfo_df = exhibition_crawler.main(rno, jcd, hd)
 
     # race_listから取れるデータを取得
     the_motor_and_boat_df = race_list_crawler.main(rno, jcd, hd)
