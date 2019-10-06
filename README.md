@@ -44,10 +44,18 @@ $ python3 src/automated_voting/voting_algolithms/LR_analyzer.py
 ```
 $ python3 src/automated_voting/voting_algolithms/LR_voter.py -rno 11R -jcd 戸　田 -hd 2019/07/21
 ```
+
 アウトプットは、
-- 1号艇の1着率
-- 2-6号艇が3着以内に入る確率
+
+- [1号艇の1着率, 2-6号艇が3着以内に入る確率]
+
+    例：[0.60, 0.68, 0.64, 0.49, 0.21, 0.17]
+
 - 推奨bet list (3連単). 推奨betがない場合空のリストが返される
+
+    例：["1-2-3", "1-2-4"]
+
+デフォルトでは、1号艇の1着率が0.6以上、2号艇の3位以内率が0.5以上かつ3-6号艇の中で3着以内率0.5以上のものiがあった場合に2-1-iの形で3連単bet
 
 ## 使い方　応用編
 ### データ準備
@@ -82,12 +90,12 @@ $ python3 src/data_preparing/race_result_supplement_csv_maker.py -s 20190815 -e 
 ※ `git clone` した場合，19年1月1日〜8月15日のデータがダウンロード済み。
 
 ### データロード
-レース日・開催場所・レース番号をindexとし、レース結果や諸々の統計量をカラムにしたpandas dfを作成し、変数に格納
+レース日・開催場所・レース番号をindexとし、レース結果や諸々の統計量をカラムにしたpandas dfを作成
 
 ```
 (in python)
 import loader
-df = race_results_loader
+df = loader.main()
 ```
 
 ### 解析

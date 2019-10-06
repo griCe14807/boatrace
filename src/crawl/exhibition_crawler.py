@@ -1,86 +1,129 @@
 # -*- coding=utf8 =*-
-import time
-import sys
-import os
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(current_dir, '../conf/'))
+import time
+import pandas as pd
+import re
 
 # my module
 import boatrace_crawler_conf
-import selenium_conf
+
+def crawl_beforeinfo(soup, rno, jcd, hd):
+    """
+    モーターおよびボートのデータをcrawl
+    :return:
+    """
+    race_result_dict = {"date": "-".join([hd[0:4], hd[5:7], hd[8:10]]),
+                        "venue": jcd,
+                        "raceNumber": rno[:-1]
+                        }
+    table = soup.find(class_="contentsFrame1_inner").find_all(class_="table1")[1]
+    rows = table.find_all("tbody", {"class": "is-fs12"})
+
+    for i, row in enumerate(rows, 1):
+        # 選手名。最後の[1:-1]は改行を削除するため
+        racer_name = row.find(class_="is-fs18 is-fBold").text
+        # racerの書式をダウンロードファイルに合わせる
+        racer_ = racer_name.split("\u3000")
+
+        # 苗字3文字名前3文字の場合
+        if len(racer_[0])==6:
+            racer = racer_[0][0:3] + "\u3000\u3000" + racer_[0][3:6]
+
+        # 苗字の文字数を整える
+        elif len(racer_[0]) == 1:
+            racer_[0] = racer_[0] + "\u3000\u3000"
+        elif len(racer_[0]) == 2:
+            racer_[0] = racer_[0][0] + "\u3000" + racer_[0][1]
+
+        # 名前の文字数を整える
+        if len(racer_[-1]) == 1:
+            racer_[-1] == "\u3000\u3000" + racer_[-1]
+            racer = racer_[0] + "\u3000\u3000\u3000\u3000" + racer_[-1]
+        elif len(racer_[-1]) == 2:
+            racer_[-1] = racer_[-1][0] + "\u3000" + racer_[-1][1]
+            racer = racer_[0] + "\u3000\u3000" + racer_[-1]
+        elif len(racer_[-1]) == 3:
+            racer = racer_[0] + "\u3000\u3000" + racer_[-1]
+
+        # race_result_listの要素としてクロールした結果のリストを追加
+        race_result_dict["racer_{0}".format(i)] = racer
+
+        # racer weight (kg)
+        race_result_dict["weight_{0}".format(i)] = float(row.find("td", {"rowspan": "2"}).text[:-2])
+        # 展示タイム
+        race_result_dict["exhibitionTime_{0}".format(i)] = float(row.find_all("td", {"rowspan": "4"})[3].text)
+        # チルト
+        race_result_dict["tilt_{0}".format(i)] = float(row.find_all("td", {"rowspan": "4"})[4].text)
+        # TODO: プロペラ
+        # TODO: 部品交換
+        # TODO: 前走成績
+        # TODO: 調整重量 (adjustment weight) (kg)
+        # TODO: 水面気象情報
+
+    table2 = soup.find(class_="contentsFrame1_inner").find_all(class_="table1")[2]
+    rows2 = table2.find_all("tr")
+
+    for i, row2 in enumerate(rows2[2:], 1):
+        # 進入コース
+        race_result_dict["exhibition_cource_{0}".format(i)] = row2.find_all("span")[0].text
+        # 展示start time (ST, flyng, late)
+        ex_st_ = row2.find_all("span")[3].text
+        if len(ex_st_) == 3:
+            race_result_dict["exhibition_ST_{0}".format(i)] = float(ex_st_)
+            race_result_dict["flying_{0}".format(i)] = 0
+            race_result_dict["late_{0}".format(i)] = 0
+
+        elif len(ex_st_) == 4:
+            race_result_dict["exhibition_ST_{0}".format(i)] = float(ex_st_[1:])
+            if ex_st_[0] == "F":
+                race_result_dict["flying_{0}".format(i)] = 1
+            elif ex_st_[0] == "L":
+                race_result_dict["late_{0}".format(i)] = 1
+            else:
+                raise Exception("{0}号艇ex_stが予定外（{1}）".format(i, ex_st_))
+        else:
+            raise Exception("{0}号艇ex_stが予定外（{1}）".format(i, ex_st_))
+
+    # dictをdfに変換
+    beforeinfo_df = pd.io.json.json_normalize([race_result_dict])
+
+    time.sleep(0.1)
+
+    return beforeinfo_df
 
 
-def get_start_time():
+def main(rno, jcd, hd):
+    """
+    :param rno:
+    :param jcd:
+    :param hd:
+    :return:
+    """
+    # クロール対象サイトのurl作成
+    raceResult_url = boatrace_crawler_conf.make_url("beforeinfo", rno, jcd, hd)
+    soup = boatrace_crawler_conf.html_parser(raceResult_url)
 
-    # スタート展示タブへ移動
-    driver.find_element_by_xpath("// *[ @ id = 'raceheader_board'] / a[3]").click()
-    time.sleep(INTERVAL)
+    # 存在しないraceをinputしてしまった時のためのtry-except
+    try:
+        # 対象サイトをパースしてcrawl
+        race_information_df = crawl_beforeinfo(soup, rno, jcd, hd)
+        race_information_df = race_information_df.set_index(["date", "venue", "raceNumber"])
+        return race_information_df
 
-    # スタート展示のタイムを取得しリストへ格納
-    start_time_list = []
-    for i in range(2, 8):
-        start_time = driver.find_element_by_xpath('//*[@id="board_stt"]/div[1]/table/tbody/tr[{0}]/td[5]'.format(i)).text
-        # print(start_time)
-        start_time_list.append(start_time)
-    time.sleep(INTERVAL)
-
-    return start_time_list
-
-
-def get_exhibition_time(driver, INTERVAL):
-    # 直前情報タブへ移動
-    driver.find_element_by_xpath('//*[@id="raceheader_board"]/a[4]').click()
-    time.sleep(INTERVAL)
-
-    # 展示タイムを取得しリストへ格納
-    exhibition_time_list = []
-    for i in range(6):
-        exhibition_time = driver.find_element_by_xpath(
-            '// *[ @ id = "board_tkz"] / div[1] / table / tbody / tr[{0}] / td[3]'.format(3 + 2 * i)).text
-        print(exhibition_time)
-        exhibition_time_list.append(exhibition_time)
-    time.sleep(INTERVAL)
-
-    return exhibition_time_list
-
-
-def main(input_jcd, INTERVAL):
-
-    # crawle先のurlを作成
-    jcd_number = boatrace_crawler_conf.make_jcd_dict()[input_jcd]
-    target_url = "http://livebb.jlc.ne.jp/bb_top/new_bb/index.php?tpl={0}".format(jcd_number)
-
-    # driver
-    driver = selenium_conf.load_driver()
-    time.sleep(INTERVAL)
-
-    # 対象サイトへアクセス
-    driver.get(target_url)
-    time.sleep(INTERVAL)
-
-    # 展示タイムを取得
-    exhibition_time_list = get_exhibition_time(driver, INTERVAL)
-
-    # floatに変換
-    exhibition_time_list = [float(time) for time in exhibition_time_list]
-
-    # ブラウザを閉じる
-    # driver.quit()
-
-    return exhibition_time_list
+    except IndexError:
+        return None
 
 
 
 if __name__ == "__main__":
 
-    # ------------input-------------- #
+    # pandas print時に省略しない設定
+    pd.set_option('display.max_columns', 40)
 
-    input_jcd = "若　松"
+    the_rno = "11R"
+    the_jcd = "住之江"
+    the_hd = "2019/10/06"
 
-    # 各動作間の待ち時間（秒）
-    INTERVAL = 3
+    the_beforeinfo_df = main(the_rno, the_jcd, the_hd)
 
-    # ------------------------------- #
-
-    the_exhibition_time_list = main(input_jcd, INTERVAL)
+    print(the_beforeinfo_df)

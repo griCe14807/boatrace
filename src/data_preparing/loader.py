@@ -383,7 +383,6 @@ def main():
     # racer_dfのデータの一部をマージ
     for i in range(1, 7):
         # 枠ごとの平均スタート順位，枠ごとの連帯率をマージ
-        # TODO: ここは，とりあえずあるデータをすべてマージしたものを返す関数にするか，inputで指定できるようにするかを決め，そのように作る．
         for_merge_df = racer_df[["racerName_ch",
                                  "class",
                                  "aveST_frame{0}".format(i),
@@ -411,7 +410,7 @@ def main():
     # 今大会のこれまでの結果
     column_list_element5 = ["CS_frame_{0}_{1}".format(i, j) for i in range(1, 7) for j in range(1, 12)]
     column_list_element6 = ["CS_rank_{0}_{1}".format(i, j) for i in range(1, 7) for j in range(1, 12)]
-    # 全国、当地の勝率・二連率・三連率
+    # 全国、当地の勝率・二連率・三連率, 平均ST
     column_list_element7 = ["win_rate_national_{0}".format(i) for i in range(1, 7)]
     column_list_element8 = ["win_rate_local_{0}".format(i) for i in range(1, 7)]
     column_list_element9 = ["ave_start_time_{0}".format(i) for i in range(1, 7)]

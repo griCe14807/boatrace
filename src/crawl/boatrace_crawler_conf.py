@@ -42,7 +42,8 @@ def daterange(_start, _end):
 
 def make_url(what, rno, jcd, hd):
     """
-    :param what: 何をcrawleするか。選択肢は、"odds3t"（オッズ）, "racelist"(出走表）もしくは"raceresult" (レース結果)
+    :param what: 何をcrawleするか。選択肢は、"odds3t"（オッズ）, "racelist"(出走表）,
+    "beforeinfo" (直前情報）もしくは"raceresult" (レース結果)
     :param rno: レース番号。8Rなど、1-12の数字 + R をstrで
     :param jcd: 会場名。"桐　生"、"びわこ"など
     :param hd: holding day (レース開催日)、2019/03/28などyyyy/mm/ddの形で入力（strで）
