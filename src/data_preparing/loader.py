@@ -447,7 +447,7 @@ def main():
 current_dir = os.path.dirname(os.path.abspath(__file__))
 race_results_file_path = os.path.join(current_dir, '../../data/results_race/K1*.TXT')
 racer_filename = os.path.join(current_dir, "../../data/racer/fan1904.txt")
-race_results_supplementary_path = os.path.join(current_dir, "../../data/motor_and_boat/1*.csv")
+race_results_supplementary_path = os.path.join(current_dir, "../../data/racelist/1*.csv")
 
 
 if __name__ == "__main__":

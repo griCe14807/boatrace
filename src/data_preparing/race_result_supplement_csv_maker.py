@@ -12,11 +12,16 @@ sys.path.append(os.path.join(current_dir, '../crawl/'))
 # my module
 import race_list_crawler
 import boatrace_crawler_conf
+import exhibition_crawler
 
 
 def argparser():
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("-w", "--what",
+                        help=u"何をcrawlするか. 'racelist' or 'beforeinfo'で指定",
+                        required=True
+                        )
     parser.add_argument("-s", "--start_date",
                         help=u"'20190102'のように6桁の数字で指定",
                         required=True
@@ -29,11 +34,27 @@ def argparser():
 
     return args
 
+def info_type_selector(what):
+    """
+
+    :param what:
+    :return:
+    """
+    crawler_dict = {"racelist": race_list_crawler.main,
+                    "beforeinfo": exhibition_crawler.main
+                    }
+    crawler = crawler_dict[what]
+
+    output_path = os.path.join('../../data', what)
+
+    return crawler, output_path
+
 
 if __name__ == "__main__":
 
-    # crawl開始日付、終了日付の指定
+    # crawl開始日付、終了日付, クロール先、出力先の指定
     the_args = argparser()
+    the_crawler, the_output_path = info_type_selector(the_args.what)
     the_date_from = the_args.start_date
     the_date_to = the_args.end_date
 
@@ -52,7 +73,7 @@ if __name__ == "__main__":
         for the_rno, the_jcd in itertools.product(the_rno_list, the_jcd_list):
 
             # crawl
-            this_race_result_df = race_list_crawler.main(the_rno, the_jcd, the_hd)
+            this_race_result_df = the_crawler(the_rno, the_jcd, the_hd)
             this_race_result_df_list.append(this_race_result_df)
 
             time.sleep(1)
@@ -61,7 +82,7 @@ if __name__ == "__main__":
         the_race_result_df = pd.concat(this_race_result_df_list)
 
         # output csvファイルの指定
-        output_path = os.path.join(current_dir, '../../data/motor_and_boat')
+        output_path = os.path.join(current_dir, the_output_path)
         the_output_filename = os.path.join(output_path, the_hd[2:4] + the_hd[5:7] + the_hd[8:10] + ".csv")
         print(the_output_filename)
         # 書きだし

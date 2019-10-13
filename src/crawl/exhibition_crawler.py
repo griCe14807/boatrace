@@ -49,11 +49,15 @@ def crawl_beforeinfo(soup, rno, jcd, hd):
         race_result_dict["racer_{0}".format(i)] = racer
 
         # racer weight (kg)
-        race_result_dict["weight_{0}".format(i)] = float(row.find("td", {"rowspan": "2"}).text[:-2])
+        # 書いていないことがあり、その場合エラーになる
+        race_result_dict["weight_{0}".format(i)] = row.find("td", {"rowspan": "2"}).text[:-2]
+
         # 展示タイム
-        race_result_dict["exhibitionTime_{0}".format(i)] = float(row.find_all("td", {"rowspan": "4"})[3].text)
-        # チルト
-        race_result_dict["tilt_{0}".format(i)] = float(row.find_all("td", {"rowspan": "4"})[4].text)
+        race_result_dict["exhibitionTime_{0}".format(i)] = row.find_all("td", {"rowspan": "4"})[3].text
+
+        # チルト角度
+        race_result_dict["tilt_{0}".format(i)] = row.find_all("td", {"rowspan": "4"})[4].text
+
         # TODO: プロペラ
         # TODO: 部品交換
         # TODO: 前走成績
@@ -64,17 +68,17 @@ def crawl_beforeinfo(soup, rno, jcd, hd):
     rows2 = table2.find_all("tr")
 
     for i, row2 in enumerate(rows2[2:], 1):
-        # 進入コース
+        # 展示競争での進入コース
         race_result_dict["exhibition_cource_{0}".format(i)] = row2.find_all("span")[0].text
         # 展示start time (ST, flyng, late)
         ex_st_ = row2.find_all("span")[3].text
         if len(ex_st_) == 3:
-            race_result_dict["exhibition_ST_{0}".format(i)] = float(ex_st_)
+            race_result_dict["exhibition_ST_{0}".format(i)] = ex_st_
             race_result_dict["flying_{0}".format(i)] = 0
             race_result_dict["late_{0}".format(i)] = 0
 
         elif len(ex_st_) == 4:
-            race_result_dict["exhibition_ST_{0}".format(i)] = float(ex_st_[1:])
+            race_result_dict["exhibition_ST_{0}".format(i)] = ex_st_[1:]
             if ex_st_[0] == "F":
                 race_result_dict["flying_{0}".format(i)] = 1
             elif ex_st_[0] == "L":
@@ -83,6 +87,17 @@ def crawl_beforeinfo(soup, rno, jcd, hd):
                 raise Exception("{0}号艇ex_stが予定外（{1}）".format(i, ex_st_))
         else:
             raise Exception("{0}号艇ex_stが予定外（{1}）".format(i, ex_st_))
+
+    # dictの値でfloatにできるものはしておく
+    float_key_list = ["weight_{0}".format(i), "exhibitionTime_{0}".format(i), "tilt_{0}".format(i),
+                       "exhibition_cource_{0}".format(i), "exhibition_ST_{0}".format(i)]
+    for i in range(1, 7):
+        for key in float_key_list:
+            try:
+                race_result_dict[key] = float(race_result_dict[key])
+            except ValueError:
+                race_result_dict[key] = None
+                print("{0}はfloatにできず".format(key))
 
     # dictをdfに変換
     beforeinfo_df = pd.io.json.json_normalize([race_result_dict])
@@ -101,6 +116,7 @@ def main(rno, jcd, hd):
     """
     # クロール対象サイトのurl作成
     raceResult_url = boatrace_crawler_conf.make_url("beforeinfo", rno, jcd, hd)
+    print(raceResult_url)
     soup = boatrace_crawler_conf.html_parser(raceResult_url)
 
     # 存在しないraceをinputしてしまった時のためのtry-except

@@ -186,8 +186,8 @@ if __name__ == "__main__":
     """
     # ----------input------------
     the_rno = "11R"
-    the_jcd = "常　滑"
-    the_hd = "2019/09/01"
+    the_jcd = "桐　生"
+    the_hd = "2019/10/13"
 
     threshold_1 = 0.6
     threshold_2 = 0.8
