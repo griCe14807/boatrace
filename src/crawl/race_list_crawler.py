@@ -149,6 +149,11 @@ def main(rno, jcd, hd):
     except IndexError:
         return None
 
+    # connectionResetErrorとかが起った場合、soupでNoneが返されてここでAttributeError
+    except AttributeError:
+        return None
+
+
 
 
 if __name__ == "__main__":

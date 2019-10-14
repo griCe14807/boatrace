@@ -2,7 +2,6 @@
 
 import time
 import pandas as pd
-import re
 
 # my module
 import boatrace_crawler_conf
@@ -81,10 +80,17 @@ def crawl_beforeinfo(soup, rno, jcd, hd):
             race_result_dict["exhibition_ST_{0}".format(i)] = ex_st_[1:]
             if ex_st_[0] == "F":
                 race_result_dict["flying_{0}".format(i)] = 1
-            elif ex_st_[0] == "L":
+            # elif ex_st_[0] == "L":
+            #     race_result_dict["late_{0}".format(i)] = 1
+            else:
+                raise Exception("{0}号艇ex_stが予定外（{1}）".format(i, ex_st_))
+        elif len(ex_st_) == 1:
+            if ex_st_[0] == "L":
+                race_result_dict["exhibition_ST_{0}".format(i)] = None
                 race_result_dict["late_{0}".format(i)] = 1
             else:
                 raise Exception("{0}号艇ex_stが予定外（{1}）".format(i, ex_st_))
+
         else:
             raise Exception("{0}号艇ex_stが予定外（{1}）".format(i, ex_st_))
 
@@ -117,6 +123,8 @@ def main(rno, jcd, hd):
     # クロール対象サイトのurl作成
     raceResult_url = boatrace_crawler_conf.make_url("beforeinfo", rno, jcd, hd)
     print(raceResult_url)
+
+    # パース
     soup = boatrace_crawler_conf.html_parser(raceResult_url)
 
     # 存在しないraceをinputしてしまった時のためのtry-except
@@ -129,6 +137,9 @@ def main(rno, jcd, hd):
     except IndexError:
         return None
 
+    # connectionResetErrorとかが起った場合、soupでNoneが返されてここでAttributeError
+    except AttributeError:
+        return None
 
 
 if __name__ == "__main__":

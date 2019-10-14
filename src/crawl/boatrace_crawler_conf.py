@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from datetime import timedelta
-
+from http.client import RemoteDisconnected
 from bs4 import BeautifulSoup
 import urllib.request
 
@@ -62,10 +62,21 @@ def html_parser(site_url):
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0",
     }
-    request = urllib.request.Request(url=site_url, headers=headers)
-    response = urllib.request.urlopen(request)
 
-    html = response.read().decode('utf-8')
-    soup = BeautifulSoup(html, 'lxml')
+    try:
+        request = urllib.request.Request(url=site_url, headers=headers)
+        response = urllib.request.urlopen(request)
+
+        html = response.read().decode('utf-8')
+        soup = BeautifulSoup(html, 'lxml')
+
+    # データベース作成の際、remotedisconnectedになった場合,そのレースをパス
+    except RemoteDisconnected:
+        print("remote disconnected error !")
+        return None
+
+    except ConnectionResetError:
+        print("Connection Reset error !")
+        return None
 
     return soup
