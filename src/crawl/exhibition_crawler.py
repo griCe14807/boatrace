@@ -104,6 +104,9 @@ def crawl_beforeinfo(soup, rno, jcd, hd):
             except ValueError:
                 race_result_dict[key] = None
                 print("{0}はfloatにできず".format(key))
+            except TypeError:
+                race_result_dict[key] = None
+                print("{0}はfloatにできず".format(key))
 
     # dictをdfに変換
     beforeinfo_df = pd.io.json.json_normalize([race_result_dict])
