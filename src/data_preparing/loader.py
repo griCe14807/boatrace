@@ -348,7 +348,7 @@ def load_racer_data():
 
     return racer_df
 
-def load_race_results_supplementary_data():
+def load_race_results_supplementary_data(race_results_supplementary_path):
     race_results_supplementary_df_list = []
     for filename in glob.glob(race_results_supplementary_path):
         race_results_supplementary_df_ = pd.read_csv(filename)
@@ -360,10 +360,13 @@ def load_race_results_supplementary_data():
     return race_results_supplementary_df
 
 
+
 def main():
     merged_df = load_race_results()
     racer_df = load_racer_data()
-    race_results_supplementary_df = load_race_results_supplementary_data()
+    race_results_supplementary_df = load_race_results_supplementary_data(race_results_supplementary_path)
+    beforeinfo_df = load_race_results_supplementary_data(beforeinfo_path)
+
     for i in range(1, 7):
         for j in range(1, 12):
             # 最近のレース結果は欠損値が多く生じるので0で埋める
@@ -397,8 +400,8 @@ def main():
         merged_df = pd.merge(merged_df, for_merge_df, how="left",
                              left_on="racerName_{0}".format(i), right_on="racerName_ch")
 
-    # race_result supplementaryの一部をマージ
 
+    # race_result supplementaryの一部をマージ
     # レースナンバー、開催地、開催日
     column_list_index = ["raceNumber", "venue", "date"]
     # モーターの二連率、3連率
@@ -432,12 +435,20 @@ def main():
     merged_df = pd.merge(merged_df,
                          race_results_supplementary_df[column_list],
                          how="left",
-                         on=["date", "venue", "raceNumber"]
-                             )
+                         on=column_list_index
+                         )
+
     for i in range(1, 7):
         for j in range(1, 12):
             merged_df[["CS_frame_{0}_{1}".format(i, j),
                        "CS_rank_{0}_{1}".format(i, j)]].astype(float)
+
+    # beforeinfo dfの一部をまーじ
+    column_list = column_list_index + ["exhibition_cource_{0}".format(i) for i in range(1, 7)]
+    merged_df = pd.merge(merged_df, beforeinfo_df[column_list],
+                         how="left",
+                         on=column_list_index
+                         )
 
     return merged_df
 
@@ -448,6 +459,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 race_results_file_path = os.path.join(current_dir, '../../data/results_race/K1*.TXT')
 racer_filename = os.path.join(current_dir, "../../data/racer/fan1904.txt")
 race_results_supplementary_path = os.path.join(current_dir, "../../data/racelist/1*.csv")
+beforeinfo_path = os.path.join(current_dir, "../../data/beforeinfo/1*.csv")
 
 
 if __name__ == "__main__":
@@ -459,9 +471,12 @@ if __name__ == "__main__":
     # racer_df = load_racer_data()
     # print(racer_df[["dateFrom", "dateTo"]])
 
-    # the_race_results_supplementary_df = load_race_results_supplementary_data()
+    # the_race_results_supplementary_df = load_race_results_supplementary_data(race_results_supplementary_path)
     # print(the_race_results_supplementary_df)
+
+    # the_beforeinfo_df = load_race_results_supplementary_data(beforeinfo_path)
+    # print(the_beforeinfo_df["date"])
 
     the_merged_df = main()
     # the_merged_df.to_csv("/Users/grice/mywork/boatrace/data/motor_and_boat/test<.csv")
-    print(the_merged_df["CS_frame_1_1"])
+    print(the_merged_df[["CS_frame_1_1", "exhibition_cource_1"]])

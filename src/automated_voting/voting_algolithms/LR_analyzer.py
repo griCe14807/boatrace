@@ -152,6 +152,10 @@ if __name__ == "__main__":
         # 展示タイム
         fv_list.append("exhibitionTime_{0}".format(i))
 
+        # 展示競争の進入コース
+        fv_list.append("exhibition_cource_{0}".format(i))
+
+
         # 各モーターの2連率, 3連率
         fv_list.append("motor_place2Ratio_{0}".format(i))
         fv_list.append("motor_place3Ratio_{0}".format(i))
@@ -159,7 +163,6 @@ if __name__ == "__main__":
         # ボートの2連率、3連率
         fv_list.append("boat_place2Ratio_{0}".format(i))
         fv_list.append("boat_place3Ratio_{0}".format(i))
-
 
     # 解析に使うラベルカラム: 今回は一枠が一着になるかどうか？を予測
     column_list_label = ["rank_{0}".format(i) for i in range(1, 7)]
@@ -191,6 +194,9 @@ if __name__ == "__main__":
 
     # 学習に使う特徴量、ラベルを用意
     fv_label_df, fv_label_odds_df = make_df_for_analyze(the_merged_df, fv_list, column_list_label, odds_list)
+    pd.set_option("display.max_columns", 500)
+    print(fv_label_df)
+
     # labelのカラムをcsvとして書き出しておく（voterに使う）
     with open(os.path.join(current_dir, 'colum_list.csv'), "w", encoding="Shift_jis") as f:
         writer = csv.writer(f, lineterminator="\n")  # writerオブジェクトの作成 改行記号で行を区切る

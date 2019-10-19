@@ -62,7 +62,6 @@ def voting_algolithm_1(predict_proba_all, threshold_1, threshold_2, threshold_3)
 
     voting_number_set = set(voting_number_list)
     voting_number_list = list(voting_number_set)
-    print(voting_number_list)
 
     return voting_number_list
 
@@ -85,17 +84,11 @@ def voting_algolithm_2(predict_proba_all, threshold_1, threshold_2, threshold_3)
                 if predict_proba_all[k - 1] > threshold_3:
                     voting_number_list.append("2-1-{0}".format(k))
 
-    print(voting_number_list)
-
     return voting_number_list
 
 
 
-def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3, algolithm_key):
-
-    algolithm_dict = {"voting_algolithm_1": voting_algolithm_1,
-                      "voting_algolithm_2": voting_algolithm_2
-                      }
+def main(rno, jcd, hd):
 
     venue_list = ["　津　", "三　国", "下　関", "丸　亀", "住之江",
                   "児　島", "唐　津", "多摩川", "大　村", "宮　島",
@@ -135,6 +128,8 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3, algolithm_key):
         for_analysis_dict["place3Ratio_local_{0}".format(i)] = the_motor_and_boat_df["place3Ratio_local_{0}".format(i)]
         # 展示タイム
         for_analysis_dict["exhibitionTime_{0}".format(i)] = the_beforeinfo_df["exhibitionTime_{0}".format(i)]
+        # 展示競争の進入コース
+        for_analysis_dict["exhibition_cource_{0}".format(i)] = the_beforeinfo_df["exhibition_cource_{0}".format(i)]
 
         # モーターおよびボートの成績
         for_analysis_dict["motor_place2Ratio_{0}".format(i)] = float(the_motor_and_boat_df["motor_place2Ratio_{0}".format(i)][0][1:])
@@ -150,7 +145,7 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3, algolithm_key):
 
     # dfに格納
     for_analysis_df = pd.DataFrame(for_analysis_dict)
-
+    pd.set_option("display.max_columns", 500)
     # クラスカラムを，A1 =0, A2 = 1のように数字に変換する
     for_analysis_df = convert_class_into_int(for_analysis_df)
 
@@ -167,8 +162,10 @@ def main(rno, jcd, hd, threshold_1, threshold_2, threshold_3, algolithm_key):
     print(predict_proba_all)
 
     # 投票するリストを作成 (1頭でx_2を超えたやつとx_3を超えたやつの組み合わせbox
-    algolithm = algolithm_dict[algolithm_key]
-    voting_number_list = algolithm(predict_proba_all, threshold_1, threshold_2, threshold_3)
+    voting_number_list_1 = voting_algolithm_1(predict_proba_all, 0.75, 0.6, 0.6)
+    voting_number_list_2 = voting_algolithm_2(predict_proba_all, 0.6, 0.8, 0.5)
+    voting_number_list = voting_number_list_1 + voting_number_list_2
+    print(voting_number_list)
 
     return voting_number_list
 
@@ -185,16 +182,10 @@ if __name__ == "__main__":
     
     """
     # ----------input------------
-    the_rno = "11R"
-    the_jcd = "桐　生"
-    the_hd = "2019/10/13"
-
-    threshold_1 = 0.6
-    threshold_2 = 0.8
-    threshold_3 = 0.5
-
-    algolithm_key = "voting_algolithm_2"
+    the_rno = "1R"
+    the_jcd = "常　滑"
+    the_hd = "2019/10/19"
 
     # ---------------------------
 
-    the_voting_number_list = main(the_rno, the_jcd, the_hd, threshold_1, threshold_2, threshold_3, algolithm_key)
+    the_voting_number_list = main(the_rno, the_jcd, the_hd)
