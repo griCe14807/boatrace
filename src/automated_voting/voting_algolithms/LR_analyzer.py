@@ -195,7 +195,6 @@ if __name__ == "__main__":
     # 学習に使う特徴量、ラベルを用意
     fv_label_df, fv_label_odds_df = make_df_for_analyze(the_merged_df, fv_list, column_list_label, odds_list)
     pd.set_option("display.max_columns", 500)
-    print(fv_label_df)
 
     # labelのカラムをcsvとして書き出しておく（voterに使う）
     with open(os.path.join(current_dir, 'colum_list.csv'), "w", encoding="Shift_jis") as f:
