@@ -161,8 +161,8 @@ def main(rno, jcd, hd):
         predict_proba_all.append(clf.predict_proba(x)[0][1])
 
     # 投票するリストを作成 (1頭でx_2を超えたやつとx_3を超えたやつの組み合わせbox
-    voting_number_list_1 = voting_algolithm_1(predict_proba_all, 0.7, 0.7, 0.6)
-    voting_number_list_2 = voting_algolithm_2(predict_proba_all, 0.6, 0.8, 0.5)
+    voting_number_list_1 = voting_algolithm_1(predict_proba_all, 0.6, 0.8, 0.7)
+    voting_number_list_2 = voting_algolithm_2(predict_proba_all, 0.5, 0.8, 0.6)
     voting_number_list = voting_number_list_1 + voting_number_list_2
     print(voting_number_list)
 
