@@ -18,7 +18,7 @@ import exhibition_crawler
 def argparser():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-w", "--what",
+    parser.add_argument("-k", "--crawl_key",
                         help=u"何をcrawlするか. 'racelist' or 'beforeinfo'で指定",
                         required=True
                         )
@@ -41,11 +41,12 @@ def info_type_selector(what):
     :return:
     """
     crawler_dict = {"racelist": race_list_crawler.main,
-                    "beforeinfo": exhibition_crawler.main
+                    "beforeinfo": exhibition_crawler.main,
+                    "odds3t":odds_crawler.
                     }
     crawler = crawler_dict[what]
 
-    output_path = os.path.join('../../data', what)
+    
 
     return crawler, output_path
 
@@ -54,9 +55,10 @@ if __name__ == "__main__":
 
     # crawl開始日付、終了日付, クロール先、出力先の指定
     the_args = argparser()
-    the_crawler, the_output_path = info_type_selector(the_args.what)
+    crawl_key = the_args.crawl_key
     the_date_from = the_args.start_date
     the_date_to = the_args.end_date
+    the_output_path = output_path = os.path.join('../../data', crawl_key)
 
     # 以下で定義する全てのリストの要素の組み合わせについてcrawlを行う.
     # race noのリスト
@@ -73,7 +75,7 @@ if __name__ == "__main__":
         for the_rno, the_jcd in itertools.product(the_rno_list, the_jcd_list):
 
             # crawl
-            this_race_result_df = the_crawler(the_rno, the_jcd, the_hd)
+            this_race_result_df = boatrace_crawler.conf(the_rno, the_jcd, the_hd, crawl_key)
             this_race_result_df_list.append(this_race_result_df)
 
             time.sleep(1)
