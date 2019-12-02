@@ -360,7 +360,6 @@ def load_race_results_supplementary_data(race_results_supplementary_path):
     return race_results_supplementary_df
 
 
-
 def main():
     merged_df = load_race_results()
     racer_df = load_racer_data()
@@ -444,7 +443,10 @@ def main():
                        "CS_rank_{0}_{1}".format(i, j)]].astype(float)
 
     # beforeinfo dfの一部をまーじ
-    column_list = column_list_index + ["exhibition_cource_{0}".format(i) for i in range(1, 7)]
+    column_list = column_list_index +\
+                  ["exhibition_cource_{0}".format(i) for i in range(1, 7)] +\
+                  ["exhibition_ST_{0}".format(i) for i in range(1, 7)] +\
+                  ["flying_{0}".format(i) for i in range(1, 7)]
     merged_df = pd.merge(merged_df, beforeinfo_df[column_list],
                          how="left",
                          on=column_list_index
@@ -479,4 +481,4 @@ if __name__ == "__main__":
 
     the_merged_df = main()
     # the_merged_df.to_csv("/Users/grice/mywork/boatrace/data/motor_and_boat/test<.csv")
-    print(the_merged_df[["CS_frame_1_1", "exhibition_cource_1"]])
+    print(the_merged_df[["exhibition_cource_1", "exhibition_ST_1"]])

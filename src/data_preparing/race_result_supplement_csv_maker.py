@@ -10,9 +10,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(current_dir, '../crawl/'))
 
 # my module
-import race_list_crawler
+import boatrace_crawler
 import boatrace_crawler_conf
-import exhibition_crawler
 
 
 def argparser():
@@ -33,22 +32,6 @@ def argparser():
     args = parser.parse_args()
 
     return args
-
-def info_type_selector(what):
-    """
-
-    :param what:
-    :return:
-    """
-    crawler_dict = {"racelist": race_list_crawler.main,
-                    "beforeinfo": exhibition_crawler.main,
-                    "odds3t":odds_crawler.
-                    }
-    crawler = crawler_dict[what]
-
-    
-
-    return crawler, output_path
 
 
 if __name__ == "__main__":
@@ -75,7 +58,7 @@ if __name__ == "__main__":
         for the_rno, the_jcd in itertools.product(the_rno_list, the_jcd_list):
 
             # crawl
-            this_race_result_df = boatrace_crawler.conf(the_rno, the_jcd, the_hd, crawl_key)
+            this_race_result_df = boatrace_crawler.main(the_rno, the_jcd, the_hd, crawl_key)
             this_race_result_df_list.append(this_race_result_df)
 
             time.sleep(1)
@@ -89,5 +72,3 @@ if __name__ == "__main__":
         print(the_output_filename)
         # 書きだし
         the_race_result_df.to_csv(the_output_filename, index=True)
-
-

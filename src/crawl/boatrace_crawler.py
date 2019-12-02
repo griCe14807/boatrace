@@ -10,7 +10,7 @@ import boatrace_crawler_conf
 
 def scrape_racelist(soup, rno, jcd, hd):
     """
-    モーターおよびボートのデータをcrawlし、csvとして保存
+    racelistのページに書かれている情報をクロール
     :return:
     """
     race_result_dict = {"date": "-".join([hd[0:4], hd[5:7], hd[8:10]]),
@@ -130,8 +130,19 @@ def scrape_racelist(soup, rno, jcd, hd):
 
 def scrape_beforeinfo(soup, rno, jcd, hd):
     """
-    モーターおよびボートのデータをcrawl
+    exhibitionの情報など、直前情報ページに書かれている情報をクロール
+    :param soup:
+    :param rno:
+    :param jcd:
+    :param hd:
     :return:
+
+    # TODO: プロペラ
+    # TODO: 部品交換
+    # TODO: 前走成績
+    # TODO: 調整重量 (adjustment weight) (kg)
+    # TODO: 風向き
+
     """
     race_result_dict = {"date": "-".join([hd[0:4], hd[5:7], hd[8:10]]),
                         "venue": jcd,
@@ -179,12 +190,6 @@ def scrape_beforeinfo(soup, rno, jcd, hd):
         # チルト角度
         race_result_dict["tilt_{0}".format(i)] = row.find_all("td", {"rowspan": "4"})[4].text
 
-        # TODO: プロペラ
-        # TODO: 部品交換
-        # TODO: 前走成績
-        # TODO: 調整重量 (adjustment weight) (kg)
-        # TODO: 水面気象情報
-
     table2 = soup.find(class_="contentsFrame1_inner").find_all(class_="table1")[2]
     rows2 = table2.find_all("tr")
 
@@ -202,6 +207,7 @@ def scrape_beforeinfo(soup, rno, jcd, hd):
             race_result_dict["exhibition_ST_{0}".format(i)] = ex_st_[1:]
             if ex_st_[0] == "F":
                 race_result_dict["flying_{0}".format(i)] = 1
+                race_result_dict["late_{0}".format(i)] = 0
             # elif ex_st_[0] == "L":
             #     race_result_dict["late_{0}".format(i)] = 1
             else:
@@ -215,6 +221,17 @@ def scrape_beforeinfo(soup, rno, jcd, hd):
 
         else:
             raise Exception("{0}号艇ex_stが予定外（{1}）".format(i, ex_st_))
+
+    # 水面気象情報
+    table3 = soup.find(class_="contentsFrame1_inner").find(class_="weather1")
+    weather_data = (table3.find_all(class_="weather1_bodyUnitLabelData"))
+    weather_string = table3.find_all(class_="weather1_bodyUnitLabelTitle")
+
+    race_result_dict["temperature"] = weather_data[0].text[:-1]
+    race_result_dict["weather"] = weather_string[1].text
+    race_result_dict["wind_speed"] = weather_data[1].text[:-1]
+    race_result_dict["water_temperature"] = weather_data[2].text[:-1]
+    race_result_dict["wave_height"] = weather_data[3].text[:-2]
 
     # dictの値でfloatにできるものはしておく
     float_key_list = ["weight_{0}".format(i), "exhibitionTime_{0}".format(i), "tilt_{0}".format(i),
@@ -240,7 +257,7 @@ def scrape_beforeinfo(soup, rno, jcd, hd):
 
 def scrape_odds_trifecta(soup, rno, jcd, hd):
     """
-
+    3連単のオッズをクロール
     :param soup:
     :return place_bed: 勝式：三連単
     :return odds_list: [投票番号, 最終オッズ]のリストを全組み合わせについて格納したリスト
@@ -386,7 +403,7 @@ if __name__ == "__main__":
     the_rno = "11R"
     the_jcd = "住之江"
     the_hd = "2019/10/06"
-    crawl_key = "odds2tf"
+    crawl_key = "beforeinfo"
     """
     crawle_key: "racelist", "beforeinfo", "odds3t", "odds2tf"
     
