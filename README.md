@@ -4,12 +4,12 @@
 2. データ解析
 3. 自動bet
 
-リポジトリをクローンして使ってください
+リポジトリをクローンして使用
 
 `git clone https://github.com/griCe14807/boatrace.git`
 
 ## 1. データベース作成
-レース毎の情報をまとめてたpandas.dfを返す
+レース毎の情報をまとめたpandas.dfを返す
 ### Requirement
 ```
 pip3 install pandas
@@ -45,7 +45,7 @@ merged_df = loader.merge_statistic_df(race_result_df, racer_df)
 全てのデータを用いて解析を行うことはまれなので、必要なカラムを指定して小さなDataFrameを作成し、inputにすることを推奨。
 
 ### 元データの準備
-####　レース結果
+#### レース結果
 データソースは[公式のダウンロードサイト](http://www1.mbrace.or.jp/od2/K/dindex.html)からのレース結果ダウンロード + 
 [公式サイト](https://www.boatrace.jp/)からのスクレイプ
 
