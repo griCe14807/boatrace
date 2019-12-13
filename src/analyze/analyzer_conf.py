@@ -22,6 +22,28 @@ def make_label_boolean_ver1(for_analysis_df, column_list_label):
     return for_analysis_df
 
 
+def make_label_boolean_ver2(for_analysis_df, column_list_label):
+    """
+    dfのラベルを下記のように変換する。
+    1枠-6枠それぞれの選手に対して、1着～3着それぞれになるか否かのboolean 18個
+
+    :param for_analysis_df:
+    :param column_list_label:
+    :return:
+    """
+
+    for column_name in column_list_label:
+        for r in range(1, 4):
+            for_analysis_df.loc[for_analysis_df[column_name]==r, "{0}_{1}".format(column_name, r)] = 1
+            for_analysis_df.loc[for_analysis_df[column_name]!=r, "{0}_{1}".format(column_name, r)] = 0
+        for_analysis_df.drop(column_name, axis=1, inplace=True)
+        print(column_name)
+        print(for_analysis_df.columns)
+
+    return for_analysis_df
+
+
+
 def standerdize_feature_values(input_df, column_list_label):
     """
     特徴量+labelのdfをインプットとし、特徴量部分の標準化をおこなう。
@@ -37,3 +59,7 @@ def standerdize_feature_values(input_df, column_list_label):
 
     return df_std
 
+
+if __name__ == '__main__':
+    for_analysis_df = pd.DataFrame({"age": [1, 2, 3], "hight": [10, 20, 30]})
+    for_analysis_df = make_label_boolean_ver2(for_analysis_df, ["age", "hight"])

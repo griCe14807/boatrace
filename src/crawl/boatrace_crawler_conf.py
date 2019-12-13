@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from datetime import timedelta
-
+from http.client import RemoteDisconnected
 from bs4 import BeautifulSoup
 import urllib.request
 
@@ -42,7 +42,8 @@ def daterange(_start, _end):
 
 def make_url(what, rno, jcd, hd):
     """
-    :param what: 何をcrawleするか。選択肢は、"odds3t"（オッズ）, "racelist"(出走表）もしくは"raceresult" (レース結果)
+    :param what: 何をcrawleするか。選択肢は、"odds3t"（オッズ）, "racelist"(出走表）,
+    "beforeinfo" (直前情報）もしくは"raceresult" (レース結果)
     :param rno: レース番号。8Rなど、1-12の数字 + R をstrで
     :param jcd: 会場名。"桐　生"、"びわこ"など
     :param hd: holding day (レース開催日)、2019/03/28などyyyy/mm/ddの形で入力（strで）
@@ -61,10 +62,21 @@ def html_parser(site_url):
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:47.0) Gecko/20100101 Firefox/47.0",
     }
-    request = urllib.request.Request(url=site_url, headers=headers)
-    response = urllib.request.urlopen(request)
 
-    html = response.read().decode('utf-8')
-    soup = BeautifulSoup(html, 'lxml')
+    try:
+        request = urllib.request.Request(url=site_url, headers=headers)
+        response = urllib.request.urlopen(request)
+
+        html = response.read().decode('utf-8')
+        soup = BeautifulSoup(html, 'lxml')
+
+    # データベース作成の際、remotedisconnectedになった場合,そのレースをパス
+    except RemoteDisconnected:
+        print("remote disconnected error !")
+        return None
+
+    except ConnectionResetError:
+        print("Connection Reset error !")
+        return None
 
     return soup
