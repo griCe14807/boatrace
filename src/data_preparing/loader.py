@@ -12,8 +12,15 @@ from datetime import datetime
 import os
 
 
-def load_race_results():
+def load_race_results(race_results_file_path=
+                      os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '../../data/results_race/K1*.TXT')):
+    """
 
+    :param race_results_file_path: ダウンロードファイルのパス（glob.globで回す）
+    :return:
+
+    """
     # loadした結果を格納するための辞書を作成（最後はpandas.DataFrameにします）
     race_result_dict = {"date": [],
                         "venue": [],
@@ -57,6 +64,7 @@ def load_race_results():
 
     # レース結果のテキストファイルを読み込み、辞書に格納していく
     for filename in glob.glob(race_results_file_path):
+        # print(filename)
         with open(filename, "r", encoding="shift_jis") as f:
             result_ = f.read()
 
@@ -228,7 +236,9 @@ def load_race_results():
 
 
 
-def load_racer_data():
+def load_racer_data(racer_filename =
+                    os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "../../data/racer/fan1904.txt")):
     racer_dict = {"racerId": [],
                   "racerName_ch": [],
                   "racername_ja": [],
@@ -360,27 +370,71 @@ def load_race_results_supplementary_data(race_results_supplementary_path):
     return race_results_supplementary_df
 
 
-def main():
-    merged_df = load_race_results()
-    racer_df = load_racer_data()
-    race_results_supplementary_df = load_race_results_supplementary_data(race_results_supplementary_path)
+def make_race_result_df(race_results_file_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),'../../data/results_race/K1*.TXT'),
+                        racelist_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../data/racelist/1*.csv"),
+                        beforeinfo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../data/beforeinfo/1*.csv")
+                        ):
+
+    """
+    ダウンロードファイルのデータに、公式サイトクロールで得られるデータをmergeしたdfを作成
+
+    :return: merged_df 開催日時、開催場所、レースナンバーをindexにして表現できるレース情報をまとめたdf
+
+    """
+
+    # それぞれのdfをロード
+    merged_df = load_race_results(race_results_file_path)
+    racelist_df = load_race_results_supplementary_data(racelist_path)
     beforeinfo_df = load_race_results_supplementary_data(beforeinfo_path)
 
+    # マージ用のindexを用意 (レースナンバー、開催地、開催日)
+    column_list_index = ["raceNumber", "venue", "date"]
+
+    # racelist_dfからdropするカラム名のリストを作成
+    racelist_drop_list = []
     for i in range(1, 7):
+        racelist_drop_list.append("boatNo_{0}".format(i))   # 被った情報
+        racelist_drop_list.append("motorNo_{0}".format(i))  # 被った情報
+        racelist_drop_list.append("racer_{0}".format(i))  # 被った情報
+        racelist_drop_list.append("racer_id_{0}".format(i))  # 被った情報
+
+        # 最近のレース結果はとりあえず使わないしカラム多い
         for j in range(1, 12):
-            # 最近のレース結果は欠損値が多く生じるので0で埋める
-            race_results_supplementary_df[["CS_frame_{0}_{1}".format(i, j),
-                                           "CS_rank_{0}_{1}".format(i, j)]] = \
-                race_results_supplementary_df[["CS_frame_{0}_{1}".format(i, j),
-                                               "CS_rank_{0}_{1}".format(i, j)]].fillna(0)
+            racelist_drop_list.append("CS_frame_{0}_{1}".format(i, j))
+            racelist_drop_list.append("CS_rank_{0}_{1}".format(i, j))
+    # drop
+    racelist_df.drop(columns=racelist_drop_list, inplace=True)
 
-            # 最近のレース結果の順位に文字列が書いてあることがある（転覆とか落水とかの時）
-            race_results_supplementary_df[["CS_frame_{0}_{1}".format(i, j),
-                                           "CS_rank_{0}_{1}".format(i, j)]] = \
-                race_results_supplementary_df[["CS_frame_{0}_{1}".format(i, j),
-                                               "CS_rank_{0}_{1}".format(i, j)]].replace(
-                    ['転', 'エ', '落', 'Ｆ', 'Ｌ', '妨', '沈', '不', '欠', '＿', '失'], 0)
+    # racelistをマージ
+    merged_df = pd.merge(merged_df, racelist_df,
+                         how="left", on=column_list_index
+                         )
 
+    # beforeinfo_dfからdropするカラム名のリストを作成
+    beforeinfo_drop_list = []
+    for i in range(1, 7):
+        beforeinfo_drop_list.append("exhibitionTime_{0}".format(i))
+        beforeinfo_drop_list.append("racer_{0}".format(i))
+    # drop
+    beforeinfo_df.drop(columns=beforeinfo_drop_list, inplace=True)
+
+    merged_df = pd.merge(merged_df, beforeinfo_df,
+                         how="left",
+                         on=column_list_index
+                         )
+
+    return merged_df
+
+
+def merge_statistic_df(race_result_df, racer_df):
+    """
+
+    :param race_result_df: 開催日時、開催場所、レース番号をindexにとるdf.
+                            普通make_race_result_dfでreturnされたdfを入れる
+    :param racer_df:
+    :return:
+
+    """
 
     # racer_dfのデータの一部をマージ
     for i in range(1, 7):
@@ -396,79 +450,16 @@ def main():
 
         # レーサー名をkeyとしてマージ
         # TODO: ほんとはracer IDのほうがいい
-        merged_df = pd.merge(merged_df, for_merge_df, how="left",
+        merged_df = pd.merge(race_result_df, for_merge_df, how="left",
                              left_on="racerName_{0}".format(i), right_on="racerName_ch")
 
-
-    # race_result supplementaryの一部をマージ
-    # レースナンバー、開催地、開催日
-    column_list_index = ["raceNumber", "venue", "date"]
-    # モーターの二連率、3連率
-    column_list_element1 = ["motor_place2Ratio_{0}".format(i) for i in range(1, 7)]
-    column_list_element2 = ["motor_place3Ratio_{0}".format(i) for i in range(1, 7)]
-    # ボートの二連率、3連率
-    column_list_element3 = ["boat_place2Ratio_{0}".format(i) for i in range(1, 7)]
-    column_list_element4 = ["boat_place3Ratio_{0}".format(i) for i in range(1, 7)]
-    # 今大会のこれまでの結果
-    column_list_element5 = ["CS_frame_{0}_{1}".format(i, j) for i in range(1, 7) for j in range(1, 12)]
-    column_list_element6 = ["CS_rank_{0}_{1}".format(i, j) for i in range(1, 7) for j in range(1, 12)]
-    # 全国、当地の勝率・二連率・三連率, 平均ST
-    column_list_element7 = ["win_rate_national_{0}".format(i) for i in range(1, 7)]
-    column_list_element8 = ["win_rate_local_{0}".format(i) for i in range(1, 7)]
-    column_list_element9 = ["ave_start_time_{0}".format(i) for i in range(1, 7)]
-    column_list_element10 = ["place2Ratio_national_{0}".format(i) for i in range(1, 7)]
-    column_list_element11 = ["place2Ratio_local_{0}".format(i) for i in range(1, 7)]
-    column_list_element12 = ["place3Ratio_national_{0}".format(i) for i in range(1, 7)]
-    column_list_element13 = ["place3Ratio_local_{0}".format(i) for i in range(1, 7)]
-
-    column_list = column_list_element1 + column_list_element2+ \
-                  column_list_element3 + column_list_element4 + \
-                  column_list_element5 + column_list_element6 + \
-                  column_list_element7 + column_list_element8 + \
-                  column_list_element9 + column_list_element10 + \
-                  column_list_element11 + column_list_element12 + \
-                  column_list_element13 + \
-                  column_list_index
-
-
-    merged_df = pd.merge(merged_df,
-                         race_results_supplementary_df[column_list],
-                         how="left",
-                         on=column_list_index
-                         )
-
-    for i in range(1, 7):
-        for j in range(1, 12):
-            merged_df[["CS_frame_{0}_{1}".format(i, j),
-                       "CS_rank_{0}_{1}".format(i, j)]].astype(float)
-
-    # beforeinfo dfの一部をまーじ
-    column_list = column_list_index +\
-                  ["exhibition_cource_{0}".format(i) for i in range(1, 7)] +\
-                  ["exhibition_ST_{0}".format(i) for i in range(1, 7)] +\
-                  ["flying_{0}".format(i) for i in range(1, 7)]
-    merged_df = pd.merge(merged_df, beforeinfo_df[column_list],
-                         how="left",
-                         on=column_list_index
-                         )
-
     return merged_df
-
-
-# ファイル保存先のパス。
-# TODO: モジュールとして呼び出された時も常に実行できるようにここに書いているけど関数にした方が良いかも？
-current_dir = os.path.dirname(os.path.abspath(__file__))
-race_results_file_path = os.path.join(current_dir, '../../data/results_race/K1*.TXT')
-racer_filename = os.path.join(current_dir, "../../data/racer/fan1904.txt")
-race_results_supplementary_path = os.path.join(current_dir, "../../data/racelist/1*.csv")
-beforeinfo_path = os.path.join(current_dir, "../../data/beforeinfo/1*.csv")
 
 
 if __name__ == "__main__":
 
     # the_race_result_df = load_race_results()
     # print(the_race_result_df[["date", "venue", "raceNumber"]])
-
 
     # racer_df = load_racer_data()
     # print(racer_df[["dateFrom", "dateTo"]])
@@ -479,6 +470,6 @@ if __name__ == "__main__":
     # the_beforeinfo_df = load_race_results_supplementary_data(beforeinfo_path)
     # print(the_beforeinfo_df["date"])
 
-    the_merged_df = main()
+    the_merged_df = make_race_result_df()
     # the_merged_df.to_csv("/Users/grice/mywork/boatrace/data/motor_and_boat/test<.csv")
     print(the_merged_df[["exhibition_cource_1", "exhibition_ST_1"]])
