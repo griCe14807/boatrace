@@ -2,7 +2,7 @@
 競艇予想を行うプロジェクト.下記の機能があります。
 1. データベース作成. これまでのレース結果をpandas dfに格納
 2. データ解析
-3. 自動bet
+3. 自動投票
 
 リポジトリをクローンして使用
 
@@ -96,7 +96,7 @@ $ python3 src/data_preparing/race_result_supplement_csv_maker.py -k beforeinfo -
  - `logistic_regression_1.ipynb`: LRを用いて1着の一位率および2-6艇の3着以内率を予測。また、Regression結果を用いて様々な条件でbetしてみた時の回収率を計算。
  -   `logistic_regression_2.ipynb`: 基本logistic_regression_1と同じだが、特徴量を増やした。`LR_analyzer`, `LR_voter`はこのアルゴリズムを用いている。
 
-## 3. 自動bet
+## 3. 自動投票
 ### Requirement
 #### 必要モジュールのインストール
 
