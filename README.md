@@ -2,14 +2,14 @@
 競艇予想を行うプロジェクト.下記の機能があります。
 1. データベース作成. これまでのレース結果をpandas dfに格納
 2. データ解析
-3. 自動bet
+3. 自動投票
 
-リポジトリをクローンして使ってください
+リポジトリをクローンして使用
 
 `git clone https://github.com/griCe14807/boatrace.git`
 
 ## 1. データベース作成
-レース毎の情報をまとめてたpandas.dfを返す
+レース毎の情報をまとめたpandas.dfを返す
 ### Requirement
 ```
 pip3 install pandas
@@ -45,7 +45,7 @@ merged_df = loader.merge_statistic_df(race_result_df, racer_df)
 全てのデータを用いて解析を行うことはまれなので、必要なカラムを指定して小さなDataFrameを作成し、inputにすることを推奨。
 
 ### 元データの準備
-####　レース結果
+#### レース結果
 データソースは[公式のダウンロードサイト](http://www1.mbrace.or.jp/od2/K/dindex.html)からのレース結果ダウンロード + 
 [公式サイト](https://www.boatrace.jp/)からのスクレイプ
 
@@ -96,7 +96,7 @@ $ python3 src/data_preparing/race_result_supplement_csv_maker.py -k beforeinfo -
  - `logistic_regression_1.ipynb`: LRを用いて1着の一位率および2-6艇の3着以内率を予測。また、Regression結果を用いて様々な条件でbetしてみた時の回収率を計算。
  -   `logistic_regression_2.ipynb`: 基本logistic_regression_1と同じだが、特徴量を増やした。`LR_analyzer`, `LR_voter`はこのアルゴリズムを用いている。
 
-## 3. 自動bet
+## 3. 自動投票
 ### Requirement
 #### 必要モジュールのインストール
 

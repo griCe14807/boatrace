@@ -30,3 +30,6 @@ __pycache__/
 
 # jupyter notebook
 .ipynb_checkpoints/
+
+# Spyder
+.spyproject/

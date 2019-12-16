@@ -390,6 +390,15 @@ def make_race_result_df(race_results_file_path=os.path.join(os.path.dirname(os.p
     # マージ用のindexを用意 (レースナンバー、開催地、開催日)
     column_list_index = ["raceNumber", "venue", "date"]
 
+    # merged_df (ダウンロードデータ）からdropするカラム名のリストを作成
+    race_result_drop_list = ["win", "winOdds", "place_1", "placeOdds_1", "place_2",
+                             "placeOdds_2", "exacta", "exactaOdds", "quinella", "quinellaOdds",
+                             "wide_1", "wideOdds_1", "wide_2", "wideOdds_2", "wide_3", "wideOdds_3",
+                             "trifecta", "trifectaOdds", "trio", "trioOdds"
+                             ]
+    # drop
+    merged_df.drop(columns=race_result_drop_list, inplace=True)
+
     # racelist_dfからdropするカラム名のリストを作成
     racelist_drop_list = []
     for i in range(1, 7):
@@ -411,7 +420,7 @@ def make_race_result_df(race_results_file_path=os.path.join(os.path.dirname(os.p
                          )
 
     # beforeinfo_dfからdropするカラム名のリストを作成
-    beforeinfo_drop_list = []
+    beforeinfo_drop_list = ["temperature", "weather", "wind_speed", "wave_height"]
     for i in range(1, 7):
         beforeinfo_drop_list.append("exhibitionTime_{0}".format(i))
         beforeinfo_drop_list.append("racer_{0}".format(i))

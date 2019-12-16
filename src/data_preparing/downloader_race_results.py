@@ -45,4 +45,3 @@ class RaceResults:
 if __name__ == "__main__":
     r = RaceResults()
     r.download("2019-10-05", "2019-12-09")
-
